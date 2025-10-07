@@ -33,11 +33,13 @@
         .game-container {
             width: 95%;
             max-width: 450px;
-            height: 90vh;
+            /* افزایش ارتفاع برای فضای بیشتر در موبایل */
+            height: 100vh; 
             max-height: 800px;
             background-color: var(--dark-brown);
+            /* حذف padding اصلی container و انتقال آن به screen برای استفاده کامل از فضای flex */
+            padding: 0; 
             border-radius: 20px;
-            padding: 20px;
             box-sizing: border-box;
             position: relative;
             overflow: hidden;
@@ -46,14 +48,17 @@
         /* --- Screens --- */
         .screen {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            bottom: 20px;
+            /* استفاده از padding داخلی برای چیدمان بهتر */
+            padding: 20px; 
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
+            /* پیش‌فرض: عناصر از بالا شروع شوند */
+            justify-content: flex-start; 
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.5s ease, transform 0.5s ease;
@@ -66,13 +71,22 @@
             transform: scale(1);
         }
         
-        /* --- Header --- */
+        /* --- Menu Specific Layout Override (Critical for centering and spacing) --- */
+        #menu-screen {
+            /* این باعث می‌شود عناصر به بالا، وسط و پایین صفحه چسبیده و بقیه فضا بینشان توزیع شود */
+            justify-content: space-between; 
+        }
+
+        /* --- Header: Top Elements (Settings/Title/Score) --- */
         .header {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+        
+        /* .title-container و settings-icon در حال حاضر در header هستند و در بالاترین نقطه قرار می‌گیرند. */
+
 
         .settings-icon, .exit-icon {
             width: 30px;
@@ -120,14 +134,11 @@
             color: var(--light-gold);
         }
 
-        /* --- Menu Content --- */
-        #menu-screen {
-            overflow: hidden;
-            position: relative;
-            justify-content: space-between;
-        }
-
+        /* --- Menu Content: Centered Buttons --- */
         .menu-content {
+            /* استفاده از margin: auto برای هدایت menu-content به مرکز عمودی فضای خالی بین header و footer-menu */
+            margin-top: auto; 
+            margin-bottom: auto; 
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -149,6 +160,7 @@
             overflow: hidden;
             min-width: 200px;
             -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* اضافه کردن سایه برای جلوه بهتر دکمه */
         }
 
         .btn::before {
@@ -165,13 +177,14 @@
         .btn:hover {
             background-color: var(--gold);
             color: var(--dark-brown);
-            box-shadow: 0 0 20px var(--gold);
+            box-shadow: 0 0 25px var(--gold);
         }
 
         .btn:hover::before {
             left: 100%;
         }
         
+        /* --- Footer Menu: Bottom Elements (Challenge/Rewards) --- */
         .footer-menu {
             width: 100%;
             display: flex;
@@ -179,6 +192,8 @@
             padding: 10px 0;
             background-color: rgba(0,0,0,0.2);
             border-radius: 15px;
+            /* این المان به دلیل space-between به پایین ترین قسمت صفحه منتقل شده است */
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5); /* سایه کوچک برای جدا شدن از پس زمینه */
         }
         .footer-btn {
             background: none;
@@ -191,6 +206,10 @@
             align-items: center;
             font-size: 1rem;
             font-family: 'Vazirmatn', sans-serif;
+            transition: opacity 0.3s;
+        }
+        .footer-btn:hover {
+            opacity: 0.8;
         }
         .footer-btn small {
             font-size: 0.7rem;
@@ -207,6 +226,8 @@
             color: var(--light-gold);
             padding-bottom: 10px;
             border-bottom: 1px solid var(--gold);
+            /* اطمینان از قرارگیری در بالای game-screen */
+            margin-bottom: 20px; 
         }
 
         .game-area {
@@ -220,6 +241,7 @@
             text-align: center;
         }
 
+        /* بقیه استایل‌های بازی بدون تغییر باقی می‌مانند */
         .sentence-display {
             font-size: 1.5rem;
             font-weight: 700;
@@ -327,6 +349,8 @@
             gap: 15px;
             text-align: center;
             flex-grow: 1;
+            /* اطمینان از وسط قرارگیری محتوای Game Over */
+            height: 100%; 
         }
         .game-over-content h2 {
             font-family: 'Lalezar', cursive;
@@ -419,6 +443,7 @@
         <!-- Main Menu Screen -->
         <div id="menu-screen" class="screen active">
              <div id="particle-container"></div>
+            <!-- Header: Now positioned at the very top -->
             <div class="header" style="z-index: 1;">
                 <svg class="settings-icon" viewBox="0 0 24 24">
                     <path d="M19.4,12c0-0.2,0-0.4,0-0.6c0-0.2,0-0.4,0-0.6l2.1-1.6c0.2-0.1,0.2-0.4,0.1-0.6l-2-3.5c-0.1-0.2-0.4-0.3-0.6-0.2l-2.5,1 c-0.5-0.4-1-0.7-1.6-1l-0.4-2.7C14.4,2.2,14.2,2,14,2h-4C9.8,2,9.6,2.2,9.6,2.4L9.2,5.1C8.6,5.4,8.1,5.7,7.6,6.1l-2.5-1 C4.9,5,4.6,5.1,4.5,5.3l-2,3.5C2.4,9,2.4,9.3,2.6,9.4l2.1,1.6c0,0.2,0,0.4,0,0.6c0,0.2,0,0.4,0,0.6l-2.1,1.6 C2.4,14.7,2.4,15,2.5,15.2l2,3.5c0.1,0.2,0.4,0.3,0.6,0.2l2.5-1c0.5,0.4,1,0.7,1.6,1l0.4,2.7c0,0.2,0.2,0.4,0.4,0.4h4 c0.2,0,0.4-0.2,0.4-0.4l0.4-2.7c0.6-0.3,1.1-0.6,1.6-1l2.5,1c0.2,0.1,0.5,0,0.6-0.2l2-3.5c0.1-0.2,0.1-0.5-0.1-0.6L19.4,12z M12,15.5c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S13.9,15.5,12,15.5z"/>
@@ -431,10 +456,14 @@
                     <div class="title-box"></div>
                 </div>
             </div>
+            
+            <!-- Menu Content: Now vertically centered -->
             <div class="menu-content" style="z-index: 1;">
                 <button id="start-btn" class="btn">شروع بازی</button>
                 <button id="bot-btn" class="btn">بازی با ربات</button>
             </div>
+            
+            <!-- Footer Menu: Now positioned at the very bottom -->
             <div class="footer-menu" style="z-index: 1;">
                 <button class="footer-btn" disabled>چالش<small>به زودی</small></button>
                 <button class="footer-btn" disabled>جوایز<small>به زودی</small></button>
@@ -534,7 +563,7 @@
             { letters: "ا ب ر ت", words: ["ابر", "ربات", "ترب", "بار"] },
             { letters: "م د ر س ه", words: ["مدرسه", "مرد", "سدر", "سرد", "درس"] },
             { letters: "ق ل م", words: ["قلم", "لقم"] },
-            { letters: "ک ت ا b", words: ["کتاب", "کات", "باک", "تاب"] }
+            { letters: "ک ت ا ب", words: ["کتاب", "کات", "باک", "تاب"] }
         ];
         let currentWordData;
         let foundWords;
@@ -548,7 +577,11 @@
                 screens[screenName].classList.add('active');
             }
             if(screenName === 'menu') {
+                // Ensure particles are only created/visible on the menu
                 createParticles();
+            } else {
+                 // Clear particles when switching away from menu
+                document.getElementById('particle-container').innerHTML = '';
             }
         }
 
@@ -608,7 +641,14 @@
             }
             sentenceGameRound++;
             
+            // Get a random unique sentence (or shuffle all options and pick first)
+            const availableData = sentenceData.slice().filter(d => !d.used); // Simple uniqueness check (not robust for production)
+            if(availableData.length === 0) {
+                 // If all used, restart the data set (for endless play)
+                 sentenceData.forEach(d => d.used = false);
+            }
             const data = sentenceData[Math.floor(Math.random() * sentenceData.length)];
+            data.used = true;
             
             gameArea.innerHTML = `
                 <div class="sentence-display">${data.correct}</div>
@@ -638,7 +678,7 @@
         }
         
         function checkSentenceAnswer(button, selected, correct) {
-             document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+            document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
             
             if (selected === correct) {
                 button.classList.add('correct');
@@ -691,7 +731,8 @@
             } else if (currentWordData.words.includes(word)) {
                 // Correct word
                 foundWords.push(word);
-                updateScore(score + 5);
+                // Score based on word length for better incentive
+                updateScore(score + (word.length * 3)); 
                 
                 const foundWordsContainer = document.querySelector('.found-words-container');
                 foundWordsContainer.innerHTML += `<span class="found-word">${word}</span>`;
@@ -704,7 +745,7 @@
                         updateScore(score + 25); 
                         updateLevel(level + 1);
                         startSentenceGame();
-                     }, 1500);
+                    }, 1500);
                 }
             } else {
                 // Incorrect word
@@ -721,6 +762,7 @@
             let time = duration;
             
             function updateTimerDisplay() {
+                // Convert seconds to MM:SS format if needed, but for simplicity, keeping SS
                 timerEl.textContent = `زمان: ${time.toString().padStart(2, '0')}`;
             }
             
@@ -736,6 +778,7 @@
                         updateLevel(level + 1);
                         startSentenceGame();
                     } else {
+                        // If they found nothing, it's Game Over
                         gameOver();
                     }
                 }
@@ -767,11 +810,22 @@
             clearInterval(gameTimerInterval);
             switchScreen('menu');
         });
-        botBtn.addEventListener('click', () => {
-            comingSoonModal.classList.add('show');
-            setTimeout(() => {
-                comingSoonModal.classList.remove('show');
-            }, 2000);
+         document.querySelector('.settings-icon').addEventListener('click', () => {
+             // For now, settings opens the coming soon modal
+             comingSoonModal.classList.add('show');
+             setTimeout(() => {
+                 comingSoonModal.classList.remove('show');
+             }, 2000);
+         });
+        document.querySelectorAll('.footer-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if(e.currentTarget.hasAttribute('disabled')) {
+                    comingSoonModal.classList.add('show');
+                    setTimeout(() => {
+                        comingSoonModal.classList.remove('show');
+                    }, 2000);
+                }
+            });
         });
 
         // --- Initial Load ---
