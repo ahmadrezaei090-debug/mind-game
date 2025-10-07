@@ -14,6 +14,7 @@
             --light-gold: #f0e68c;
             --dark-brown: #3b2220;
             --text-light: #f5f5f5;
+            --mid-dark: #2c1a18; /* رنگ جدید برای پس زمینه دکمه های برجسته */
         }
 
         body {
@@ -33,11 +34,9 @@
         .game-container {
             width: 95%;
             max-width: 450px;
-            /* افزایش ارتفاع برای فضای بیشتر در موبایل */
             height: 100vh; 
             max-height: 800px;
             background-color: var(--dark-brown);
-            /* حذف padding اصلی container و انتقال آن به screen برای استفاده کامل از فضای flex */
             padding: 0; 
             border-radius: 20px;
             box-sizing: border-box;
@@ -48,7 +47,6 @@
         /* --- Screens --- */
         .screen {
             position: absolute;
-            /* استفاده از padding داخلی برای چیدمان بهتر */
             padding: 20px; 
             top: 0;
             left: 0;
@@ -57,7 +55,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* پیش‌فرض: عناصر از بالا شروع شوند */
             justify-content: flex-start; 
             opacity: 0;
             visibility: hidden;
@@ -71,10 +68,10 @@
             transform: scale(1);
         }
         
-        /* --- Menu Specific Layout Override (Critical for centering and spacing) --- */
+        /* --- Menu Specific Layout Override (تغییر برای بالاتر آوردن چالش/جوایز) --- */
         #menu-screen {
-            /* این باعث می‌شود عناصر به بالا، وسط و پایین صفحه چسبیده و بقیه فضا بینشان توزیع شود */
-            justify-content: space-between; 
+            /* حذف justify-content: space-between; تا عناصر به بالای صفحه متمایل شوند */
+            justify-content: flex-start;
         }
 
         /* --- Header: Top Elements (Settings/Title/Score) --- */
@@ -85,9 +82,6 @@
             align-items: center;
         }
         
-        /* .title-container و settings-icon در حال حاضر در header هستند و در بالاترین نقطه قرار می‌گیرند. */
-
-
         .settings-icon, .exit-icon {
             width: 30px;
             height: 30px;
@@ -134,11 +128,11 @@
             color: var(--light-gold);
         }
 
-        /* --- Menu Content: Centered Buttons --- */
+        /* --- Menu Content: Centered Buttons (تغییر موقعیت) --- */
         .menu-content {
-            /* استفاده از margin: auto برای هدایت menu-content به مرکز عمودی فضای خالی بین header و footer-menu */
-            margin-top: auto; 
-            margin-bottom: auto; 
+            /* حذف margin: auto برای قرار گرفتن در بالا */
+            margin-top: 50px; /* اضافه کردن حاشیه بالا برای جدا شدن از هدر */
+            margin-bottom: 50px; /* حاشیه پایین برای جدا شدن از footer-menu */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -152,15 +146,17 @@
             padding: 15px 40px;
             border-radius: 50px;
             border: 2px solid var(--gold);
-            background-color: transparent;
+            /* --- تغییر مهم: اضافه کردن بک‌گراند به دکمه‌ها --- */
+            background-color: var(--mid-dark); 
             color: var(--gold);
+            /* --- پایان تغییر مهم --- */
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
             min-width: 200px;
             -webkit-tap-highlight-color: transparent;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* اضافه کردن سایه برای جلوه بهتر دکمه */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); /* افزایش سایه برای برجستگی */
         }
 
         .btn::before {
@@ -178,6 +174,7 @@
             background-color: var(--gold);
             color: var(--dark-brown);
             box-shadow: 0 0 25px var(--gold);
+            transform: translateY(-2px); /* افکت کوچک در هنگام هاور */
         }
 
         .btn:hover::before {
@@ -190,26 +187,30 @@
             display: flex;
             justify-content: space-around;
             padding: 10px 0;
-            background-color: rgba(0,0,0,0.2);
+            background-color: var(--brown); /* رنگ پس زمینه متمایزتر برای فوتر */
             border-radius: 15px;
-            /* این المان به دلیل space-between به پایین ترین قسمت صفحه منتقل شده است */
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.5); /* سایه کوچک برای جدا شدن از پس زمینه */
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.7); 
+            
+            /* --- تغییر مهم: فشار دادن به پایین برای اطمینان از قرارگیری در انتهای صفحه --- */
+            margin-top: auto; 
+            /* --- پایان تغییر مهم --- */
         }
         .footer-btn {
             background: none;
             border: none;
             color: var(--light-gold);
-            opacity: 0.5;
-            cursor: not-allowed;
+            opacity: 0.8;
+            cursor: pointer; /* فعال کردن کلیک برای مودال به زودی */
             display: flex;
             flex-direction: column;
             align-items: center;
             font-size: 1rem;
             font-family: 'Vazirmatn', sans-serif;
-            transition: opacity 0.3s;
+            transition: opacity 0.3s, transform 0.3s;
         }
         .footer-btn:hover {
-            opacity: 0.8;
+            opacity: 1;
+            transform: scale(1.05);
         }
         .footer-btn small {
             font-size: 0.7rem;
@@ -226,7 +227,6 @@
             color: var(--light-gold);
             padding-bottom: 10px;
             border-bottom: 1px solid var(--gold);
-            /* اطمینان از قرارگیری در بالای game-screen */
             margin-bottom: 20px; 
         }
 
@@ -349,7 +349,6 @@
             gap: 15px;
             text-align: center;
             flex-grow: 1;
-            /* اطمینان از وسط قرارگیری محتوای Game Over */
             height: 100%; 
         }
         .game-over-content h2 {
@@ -442,10 +441,11 @@
     <div class="game-container">
         <!-- Main Menu Screen -->
         <div id="menu-screen" class="screen active">
-             <div id="particle-container"></div>
+              <div id="particle-container"></div>
+            
             <!-- Header: Now positioned at the very top -->
             <div class="header" style="z-index: 1;">
-                <svg class="settings-icon" viewBox="0 0 24 24">
+                <svg class="settings-icon" viewBox="0 0 24 24" onclick="showComingSoon()">
                     <path d="M19.4,12c0-0.2,0-0.4,0-0.6c0-0.2,0-0.4,0-0.6l2.1-1.6c0.2-0.1,0.2-0.4,0.1-0.6l-2-3.5c-0.1-0.2-0.4-0.3-0.6-0.2l-2.5,1 c-0.5-0.4-1-0.7-1.6-1l-0.4-2.7C14.4,2.2,14.2,2,14,2h-4C9.8,2,9.6,2.2,9.6,2.4L9.2,5.1C8.6,5.4,8.1,5.7,7.6,6.1l-2.5-1 C4.9,5,4.6,5.1,4.5,5.3l-2,3.5C2.4,9,2.4,9.3,2.6,9.4l2.1,1.6c0,0.2,0,0.4,0,0.6c0,0.2,0,0.4,0,0.6l-2.1,1.6 C2.4,14.7,2.4,15,2.5,15.2l2,3.5c0.1,0.2,0.4,0.3,0.6,0.2l2.5-1c0.5,0.4,1,0.7,1.6,1l0.4,2.7c0,0.2,0.2,0.4,0.4,0.4h4 c0.2,0,0.4-0.2,0.4-0.4l0.4-2.7c0.6-0.3,1.1-0.6,1.6-1l2.5,1c0.2,0.1,0.5,0,0.6-0.2l2-3.5c0.1-0.2,0.1-0.5-0.1-0.6L19.4,12z M12,15.5c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S13.9,15.5,12,15.5z"/>
                 </svg>
                 <div class="title-container">
@@ -457,16 +457,16 @@
                 </div>
             </div>
             
-            <!-- Menu Content: Now vertically centered -->
+            <!-- Menu Content: Now clustered higher up -->
             <div class="menu-content" style="z-index: 1;">
                 <button id="start-btn" class="btn">شروع بازی</button>
-                <button id="bot-btn" class="btn">بازی با ربات</button>
+                <button id="bot-btn" class="btn" onclick="showComingSoon()">بازی با ربات</button>
             </div>
             
-            <!-- Footer Menu: Now positioned at the very bottom -->
+            <!-- Footer Menu: Pushed to the very bottom by margin-top: auto on itself, and clustered higher because of menu-content change -->
             <div class="footer-menu" style="z-index: 1;">
-                <button class="footer-btn" disabled>چالش<small>به زودی</small></button>
-                <button class="footer-btn" disabled>جوایز<small>به زودی</small></button>
+                <button class="footer-btn" onclick="showComingSoon()">چالش<small>به زودی</small></button>
+                <button class="footer-btn" onclick="showComingSoon()">جوایز<small>به زودی</small></button>
             </div>
         </div>
 
@@ -487,7 +487,7 @@
         
         <!-- Game Over Screen -->
         <div id="game-over-screen" class="screen">
-             <div class="game-over-content">
+              <div class="game-over-content">
                 <h2>شکست!</h2>
                 <p>امتیاز نهایی شما: <span id="final-score">0</span></p>
                 <p>تلاش خوبی بود. دوباره امتحان کن!</p>
@@ -512,7 +512,6 @@
         };
         const highScoreEl = document.getElementById('high-score');
         const startBtn = document.getElementById('start-btn');
-        const botBtn = document.getElementById('bot-btn');
         const restartBtn = document.getElementById('restart-btn');
         const exitBtn = document.getElementById('exit-btn');
         const scoreEl = document.getElementById('score');
@@ -584,6 +583,13 @@
                 document.getElementById('particle-container').innerHTML = '';
             }
         }
+        
+        function showComingSoon() {
+             comingSoonModal.classList.add('show');
+             setTimeout(() => {
+                 comingSoonModal.classList.remove('show');
+             }, 2000);
+        }
 
         function updateScore(newScore) {
             score = newScore;
@@ -651,8 +657,9 @@
             data.used = true;
             
             gameArea.innerHTML = `
+                <p>جمله رو به دقت بخون و به خاطر بسپار:</p>
                 <div class="sentence-display">${data.correct}</div>
-                <p>جمله را به خاطر بسپارید...</p>
+                
             `;
             
             const showDuration = Math.max(1500, 4500 - (level * 250)); // Duration decreases with level
@@ -688,8 +695,8 @@
                 button.classList.add('incorrect');
                 button.parentElement.classList.add('shake');
                  document.querySelectorAll('.option-btn').forEach(btn => {
-                    if (btn.textContent === correct) btn.classList.add('correct');
-                });
+                     if (btn.textContent === correct) btn.classList.add('correct');
+                 });
                 setTimeout(gameOver, 2000);
             }
         }
@@ -703,7 +710,7 @@
                 <p>با حروف زیر کلمه بسازید:</p>
                 <div class="word-game-letters">${currentWordData.letters}</div>
                 <div class="word-input-container">
-                    <input type="text" id="word-input" placeholder="کلمه خود را بنویسید...">
+                    <input type="text" id="word-input" placeholder="کلمه خود را بنویسید..." dir="rtl">
                     <button id="word-submit-btn" class="btn">ثبت</button>
                 </div>
                 <div class="found-words-container"></div>
@@ -810,23 +817,13 @@
             clearInterval(gameTimerInterval);
             switchScreen('menu');
         });
-         document.querySelector('.settings-icon').addEventListener('click', () => {
-             // For now, settings opens the coming soon modal
-             comingSoonModal.classList.add('show');
-             setTimeout(() => {
-                 comingSoonModal.classList.remove('show');
-             }, 2000);
-         });
+        
+        // جایگزینی دکمه‌های غیرفعال با فراخوانی تابع showComingSoon
         document.querySelectorAll('.footer-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                if(e.currentTarget.hasAttribute('disabled')) {
-                    comingSoonModal.classList.add('show');
-                    setTimeout(() => {
-                        comingSoonModal.classList.remove('show');
-                    }, 2000);
-                }
-            });
+             btn.addEventListener('click', showComingSoon);
         });
+        document.querySelector('.settings-icon').addEventListener('click', showComingSoon);
+        document.getElementById('bot-btn').addEventListener('click', showComingSoon);
 
         // --- Initial Load ---
         function init() {
