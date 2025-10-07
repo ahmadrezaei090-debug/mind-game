@@ -75,8 +75,8 @@
         #menu-screen {
             /* تغییر مهم: توزیع فضا بین هدر، دکمه‌ها و فوتر */
             justify-content: space-between; 
-            /* افزایش padding-top برای اطمینان از دیده شدن کامل هدر در موبایل */
-            padding-top: 30px; 
+            /* *** تغییر اعمال شده: افزایش padding-top برای پایین آوردن عناصر بالا *** */
+            padding-top: 60px; /* افزایش از 30px به 60px */
             padding-bottom: 20px; 
         }
 
@@ -582,16 +582,16 @@
                 // Ensure particles are only created/visible on the menu
                 createParticles();
             } else {
-                   // Clear particles when switching away from menu
+                    // Clear particles when switching away from menu
                 document.getElementById('particle-container').innerHTML = '';
             }
         }
         
         function showComingSoon() {
-              comingSoonModal.classList.add('show');
-              setTimeout(() => {
-                  comingSoonModal.classList.remove('show');
-              }, 2000);
+             comingSoonModal.classList.add('show');
+             setTimeout(() => {
+                 comingSoonModal.classList.remove('show');
+             }, 2000);
         }
 
         function updateScore(newScore) {
@@ -697,9 +697,9 @@
             } else {
                 button.classList.add('incorrect');
                 button.parentElement.classList.add('shake');
-                  document.querySelectorAll('.option-btn').forEach(btn => {
-                      if (btn.textContent === correct) btn.classList.add('correct');
-                  });
+                 document.querySelectorAll('.option-btn').forEach(btn => {
+                     if (btn.textContent === correct) btn.classList.add('correct');
+                 });
                 setTimeout(gameOver, 2000);
             }
         }
@@ -751,11 +751,11 @@
                     // All words found, move to next round (back to sentence game)
                     clearInterval(gameTimerInterval);
                       setTimeout(() => {
-                         // Bonus points for finishing early
-                         updateScore(score + 25); 
-                         updateLevel(level + 1);
-                         startSentenceGame();
-                     }, 1500);
+                          // Bonus points for finishing early
+                          updateScore(score + 25); 
+                          updateLevel(level + 1);
+                          startSentenceGame();
+                      }, 1500);
                 }
             } else {
                 // Incorrect word
@@ -823,7 +823,7 @@
         
         // جایگزینی دکمه‌های غیرفعال با فراخوانی تابع showComingSoon
         document.querySelectorAll('.footer-btn').forEach(btn => {
-              btn.addEventListener('click', showComingSoon);
+             btn.addEventListener('click', showComingSoon);
         });
         document.querySelector('.settings-icon').addEventListener('click', showComingSoon);
         document.getElementById('bot-btn').addEventListener('click', showComingSoon);
