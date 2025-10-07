@@ -20,7 +20,7 @@
             font-family: 'Vazirmatn', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--brown);
+            background-color: var(--dark-brown);
             color: var(--text-light);
             display: flex;
             justify-content: center;
@@ -53,7 +53,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.5s ease, transform 0.5s ease;
@@ -74,15 +74,20 @@
             align-items: center;
         }
 
-        .settings-icon {
+        .settings-icon, .exit-icon {
             width: 30px;
             height: 30px;
             cursor: pointer;
             fill: var(--gold);
             transition: transform 0.3s;
+            -webkit-tap-highlight-color: transparent;
         }
         .settings-icon:hover {
             transform: rotate(45deg);
+        }
+        .exit-icon:hover {
+            transform: scale(1.1);
+            fill: #ff6b6b;
         }
         
         .title-container {
@@ -116,6 +121,11 @@
         }
 
         /* --- Menu Content --- */
+        #menu-screen {
+            overflow: hidden;
+            position: relative;
+        }
+
         .menu-content {
             display: flex;
             flex-direction: column;
@@ -139,6 +149,7 @@
             position: relative;
             overflow: hidden;
             min-width: 200px;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn::before {
@@ -161,12 +172,38 @@
         .btn:hover::before {
             left: 100%;
         }
+        
+        .footer-menu {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 15px;
+        }
+        .footer-btn {
+            background: none;
+            border: none;
+            color: var(--light-gold);
+            opacity: 0.5;
+            cursor: not-allowed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1rem;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        .footer-btn small {
+            font-size: 0.7rem;
+        }
+
 
         /* --- Game Screen --- */
         .game-header {
             width: 100%;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             font-size: 1.2rem;
             color: var(--light-gold);
             padding-bottom: 10px;
@@ -214,6 +251,7 @@
             cursor: pointer;
             transition: background-color 0.3s;
             text-align: right;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .option-btn:hover {
@@ -340,11 +378,40 @@
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
+        .shake { animation: shake 0.3s ease-in-out; }
 
-        .shake {
-            animation: shake 0.3s ease-in-out;
+        /* --- Particle Animation --- */
+        #particle-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
         }
-
+        .particle {
+            position: absolute;
+            bottom: -20px;
+            background-color: var(--gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatUp 10s infinite ease-in;
+        }
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+            10%, 90% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-100vh);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -352,7 +419,8 @@
     <div class="game-container">
         <!-- Main Menu Screen -->
         <div id="menu-screen" class="screen active">
-            <div class="header">
+             <div id="particle-container"></div>
+            <div class="header" style="z-index: 1;">
                 <svg class="settings-icon" viewBox="0 0 24 24">
                     <path d="M19.4,12c0-0.2,0-0.4,0-0.6c0-0.2,0-0.4,0-0.6l2.1-1.6c0.2-0.1,0.2-0.4,0.1-0.6l-2-3.5c-0.1-0.2-0.4-0.3-0.6-0.2l-2.5,1 c-0.5-0.4-1-0.7-1.6-1l-0.4-2.7C14.4,2.2,14.2,2,14,2h-4C9.8,2,9.6,2.2,9.6,2.4L9.2,5.1C8.6,5.4,8.1,5.7,7.6,6.1l-2.5-1 C4.9,5,4.6,5.1,4.5,5.3l-2,3.5C2.4,9,2.4,9.3,2.6,9.4l2.1,1.6c0,0.2,0,0.4,0,0.6c0,0.2,0,0.4,0,0.6l-2.1,1.6 C2.4,14.7,2.4,15,2.5,15.2l2,3.5c0.1,0.2,0.4,0.3,0.6,0.2l2.5-1c0.5,0.4,1,0.7,1.6,1l0.4,2.7c0,0.2,0.2,0.4,0.4,0.4h4 c0.2,0,0.4-0.2,0.4-0.4l0.4-2.7c0.6-0.3,1.1-0.6,1.6-1l2.5,1c0.2,0.1,0.5,0,0.6-0.2l2-3.5c0.1-0.2,0.1-0.5-0.1-0.6L19.4,12z M12,15.5c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S13.9,15.5,12,15.5z"/>
                 </svg>
@@ -364,18 +432,25 @@
                     <div class="title-box"></div>
                 </div>
             </div>
-            <div class="menu-content">
+            <div class="menu-content" style="z-index: 1;">
                 <button id="start-btn" class="btn">شروع بازی</button>
                 <button id="bot-btn" class="btn">بازی با ربات</button>
+            </div>
+            <div class="footer-menu" style="z-index: 1;">
+                <button class="footer-btn" disabled>چالش<small>به زودی</small></button>
+                <button class="footer-btn" disabled>جوایز<small>به زودی</small></button>
             </div>
         </div>
 
         <!-- Game Screen -->
         <div id="game-screen" class="screen">
             <div class="header game-header">
-                <div id="timer">زمان: ۰۰</div>
+                <svg id="exit-btn" class="exit-icon" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
                 <div id="level">مرحله: ۱</div>
                 <div id="score">امتیاز: ۰</div>
+                <div id="timer">زمان: ۰۰</div>
             </div>
             <div class="game-area">
                 <!-- Content will be injected by JS -->
@@ -411,6 +486,7 @@
         const startBtn = document.getElementById('start-btn');
         const botBtn = document.getElementById('bot-btn');
         const restartBtn = document.getElementById('restart-btn');
+        const exitBtn = document.getElementById('exit-btn');
         const scoreEl = document.getElementById('score');
         const timerEl = document.getElementById('timer');
         const levelEl = document.getElementById('level');
@@ -471,6 +547,9 @@
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
             if (screens[screenName]) {
                 screens[screenName].classList.add('active');
+            }
+            if(screenName === 'menu') {
+                createParticles();
             }
         }
 
@@ -664,9 +743,31 @@
             }, 1000);
         }
 
+        function createParticles() {
+            const container = document.getElementById('particle-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const particleCount = 20;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 4 + 1;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDuration = `${Math.random() * 5 + 8}s`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(particle);
+            }
+        }
+
         // --- Event Listeners ---
         startBtn.addEventListener('click', startGame);
         restartBtn.addEventListener('click', startGame);
+        exitBtn.addEventListener('click', () => {
+            clearInterval(gameTimerInterval);
+            switchScreen('menu');
+        });
         botBtn.addEventListener('click', () => {
             comingSoonModal.classList.add('show');
             setTimeout(() => {
