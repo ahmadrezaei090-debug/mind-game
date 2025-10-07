@@ -26,6 +26,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            /* استفاده از min-height برای اطمینان از پوشش کامل صفحه */
             min-height: 100vh;
             overflow: hidden;
             perspective: 1000px;
@@ -34,6 +35,7 @@
         .game-container {
             width: 95%;
             max-width: 450px;
+            /* ارتفاع 100% viewport برای موبایل */
             height: 100vh; 
             max-height: 800px;
             background-color: var(--dark-brown);
@@ -55,6 +57,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* پیش‌فرض: محتوا از بالا شروع شود */
             justify-content: flex-start; 
             opacity: 0;
             visibility: hidden;
@@ -68,10 +71,13 @@
             transform: scale(1);
         }
         
-        /* --- Menu Specific Layout Override (تغییر برای بالاتر آوردن چالش/جوایز) --- */
+        /* --- Menu Specific Layout Override (برای توزیع و مرکزیت) --- */
         #menu-screen {
-            /* حذف justify-content: space-between; تا عناصر به بالای صفحه متمایل شوند */
-            justify-content: flex-start;
+            /* تغییر مهم: توزیع فضا بین هدر، دکمه‌ها و فوتر */
+            justify-content: space-between; 
+            /* افزایش padding-top برای اطمینان از دیده شدن کامل هدر در موبایل */
+            padding-top: 30px; 
+            padding-bottom: 20px; 
         }
 
         /* --- Header: Top Elements (Settings/Title/Score) --- */
@@ -107,6 +113,7 @@
         .title-box {
             width: 40px;
             height: 40px;
+            /* رنگ طلایی و قهوه‌ای مایل به مربع */
             background: linear-gradient(45deg, var(--brown) 50%, var(--gold) 50%);
             border-radius: 8px;
         }
@@ -128,11 +135,10 @@
             color: var(--light-gold);
         }
 
-        /* --- Menu Content: Centered Buttons (تغییر موقعیت) --- */
+        /* --- Menu Content: Centered Buttons (مرکزیت کامل دکمه‌ها) --- */
         .menu-content {
-            /* حذف margin: auto برای قرار گرفتن در بالا */
-            margin-top: 50px; /* اضافه کردن حاشیه بالا برای جدا شدن از هدر */
-            margin-bottom: 50px; /* حاشیه پایین برای جدا شدن از footer-menu */
+            /* تغییر مهم: margin: auto دکمه‌ها را بین هدر و فوتر به صورت عمودی مرکز می‌کند */
+            margin: auto; 
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -146,7 +152,7 @@
             padding: 15px 40px;
             border-radius: 50px;
             border: 2px solid var(--gold);
-            /* --- تغییر مهم: اضافه کردن بک‌گراند به دکمه‌ها --- */
+            /* --- اضافه کردن بک‌گراند به دکمه‌ها --- */
             background-color: var(--mid-dark); 
             color: var(--gold);
             /* --- پایان تغییر مهم --- */
@@ -190,17 +196,14 @@
             background-color: var(--brown); /* رنگ پس زمینه متمایزتر برای فوتر */
             border-radius: 15px;
             box-shadow: 0 -5px 15px rgba(0,0,0,0.7); 
-            
-            /* --- تغییر مهم: فشار دادن به پایین برای اطمینان از قرارگیری در انتهای صفحه --- */
-            margin-top: auto; 
-            /* --- پایان تغییر مهم --- */
+            /* نیازی به margin-top: auto نیست زیرا والد از space-between استفاده می‌کند */
         }
         .footer-btn {
             background: none;
             border: none;
             color: var(--light-gold);
             opacity: 0.8;
-            cursor: pointer; /* فعال کردن کلیک برای مودال به زودی */
+            cursor: pointer; 
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -441,9 +444,9 @@
     <div class="game-container">
         <!-- Main Menu Screen -->
         <div id="menu-screen" class="screen active">
-              <div id="particle-container"></div>
+             <div id="particle-container"></div>
             
-            <!-- Header: Now positioned at the very top -->
+            <!-- Header: Now guaranteed to be visible due to increased padding on #menu-screen -->
             <div class="header" style="z-index: 1;">
                 <svg class="settings-icon" viewBox="0 0 24 24" onclick="showComingSoon()">
                     <path d="M19.4,12c0-0.2,0-0.4,0-0.6c0-0.2,0-0.4,0-0.6l2.1-1.6c0.2-0.1,0.2-0.4,0.1-0.6l-2-3.5c-0.1-0.2-0.4-0.3-0.6-0.2l-2.5,1 c-0.5-0.4-1-0.7-1.6-1l-0.4-2.7C14.4,2.2,14.2,2,14,2h-4C9.8,2,9.6,2.2,9.6,2.4L9.2,5.1C8.6,5.4,8.1,5.7,7.6,6.1l-2.5-1 C4.9,5,4.6,5.1,4.5,5.3l-2,3.5C2.4,9,2.4,9.3,2.6,9.4l2.1,1.6c0,0.2,0,0.4,0,0.6c0,0.2,0,0.4,0,0.6l-2.1,1.6 C2.4,14.7,2.4,15,2.5,15.2l2,3.5c0.1,0.2,0.4,0.3,0.6,0.2l2.5-1c0.5,0.4,1,0.7,1.6,1l0.4,2.7c0,0.2,0.2,0.4,0.4,0.4h4 c0.2,0,0.4-0.2,0.4-0.4l0.4-2.7c0.6-0.3,1.1-0.6,1.6-1l2.5,1c0.2,0.1,0.5,0,0.6-0.2l2-3.5c0.1-0.2,0.1-0.5-0.1-0.6L19.4,12z M12,15.5c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S13.9,15.5,12,15.5z"/>
@@ -457,13 +460,13 @@
                 </div>
             </div>
             
-            <!-- Menu Content: Now clustered higher up -->
+            <!-- Menu Content: Now vertically centered between Header and Footer -->
             <div class="menu-content" style="z-index: 1;">
                 <button id="start-btn" class="btn">شروع بازی</button>
                 <button id="bot-btn" class="btn" onclick="showComingSoon()">بازی با ربات</button>
             </div>
             
-            <!-- Footer Menu: Pushed to the very bottom by margin-top: auto on itself, and clustered higher because of menu-content change -->
+            <!-- Footer Menu: Pushed to the very bottom by justify-content: space-between -->
             <div class="footer-menu" style="z-index: 1;">
                 <button class="footer-btn" onclick="showComingSoon()">چالش<small>به زودی</small></button>
                 <button class="footer-btn" onclick="showComingSoon()">جوایز<small>به زودی</small></button>
@@ -579,16 +582,16 @@
                 // Ensure particles are only created/visible on the menu
                 createParticles();
             } else {
-                 // Clear particles when switching away from menu
+                   // Clear particles when switching away from menu
                 document.getElementById('particle-container').innerHTML = '';
             }
         }
         
         function showComingSoon() {
-             comingSoonModal.classList.add('show');
-             setTimeout(() => {
-                 comingSoonModal.classList.remove('show');
-             }, 2000);
+              comingSoonModal.classList.add('show');
+              setTimeout(() => {
+                  comingSoonModal.classList.remove('show');
+              }, 2000);
         }
 
         function updateScore(newScore) {
@@ -694,9 +697,9 @@
             } else {
                 button.classList.add('incorrect');
                 button.parentElement.classList.add('shake');
-                 document.querySelectorAll('.option-btn').forEach(btn => {
-                     if (btn.textContent === correct) btn.classList.add('correct');
-                 });
+                  document.querySelectorAll('.option-btn').forEach(btn => {
+                      if (btn.textContent === correct) btn.classList.add('correct');
+                  });
                 setTimeout(gameOver, 2000);
             }
         }
@@ -747,12 +750,12 @@
                 if(foundWords.length === currentWordData.words.length){
                     // All words found, move to next round (back to sentence game)
                     clearInterval(gameTimerInterval);
-                     setTimeout(() => {
-                        // Bonus points for finishing early
-                        updateScore(score + 25); 
-                        updateLevel(level + 1);
-                        startSentenceGame();
-                    }, 1500);
+                      setTimeout(() => {
+                         // Bonus points for finishing early
+                         updateScore(score + 25); 
+                         updateLevel(level + 1);
+                         startSentenceGame();
+                     }, 1500);
                 }
             } else {
                 // Incorrect word
@@ -820,7 +823,7 @@
         
         // جایگزینی دکمه‌های غیرفعال با فراخوانی تابع showComingSoon
         document.querySelectorAll('.footer-btn').forEach(btn => {
-             btn.addEventListener('click', showComingSoon);
+              btn.addEventListener('click', showComingSoon);
         });
         document.querySelector('.settings-icon').addEventListener('click', showComingSoon);
         document.getElementById('bot-btn').addEventListener('click', showComingSoon);
