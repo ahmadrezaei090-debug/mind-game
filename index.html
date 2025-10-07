@@ -1,1 +1,686 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بازی رویا</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brown: #4a2c2a;
+            --gold: #d4af37;
+            --light-gold: #f0e68c;
+            --dark-brown: #3b2220;
+            --text-light: #f5f5f5;
+        }
 
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--brown);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        .game-container {
+            width: 95%;
+            max-width: 450px;
+            height: 90vh;
+            max-height: 800px;
+            background-color: var(--dark-brown);
+            border-radius: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- Screens --- */
+        .screen {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: scale(0.95);
+        }
+
+        .screen.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        
+        /* --- Header --- */
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-icon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            fill: var(--gold);
+            transition: transform 0.3s;
+        }
+        .settings-icon:hover {
+            transform: rotate(45deg);
+        }
+        
+        .title-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title-box {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, var(--brown) 50%, var(--gold) 50%);
+            border-radius: 8px;
+        }
+        
+        .title-text {
+            text-align: right;
+        }
+
+        .title-text h1 {
+            font-family: 'Lalezar', cursive;
+            font-size: 2rem;
+            margin: 0;
+            color: var(--gold);
+        }
+
+        .title-text p {
+            font-size: 0.8rem;
+            margin: 0;
+            color: var(--light-gold);
+        }
+
+        /* --- Menu Content --- */
+        .menu-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        .btn {
+            font-family: 'Vazirmatn', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: 2px solid var(--gold);
+            background-color: transparent;
+            color: var(--gold);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-width: 200px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(212, 175, 55, 0.4), transparent);
+            transition: left 0.7s;
+        }
+        
+        .btn:hover {
+            background-color: var(--gold);
+            color: var(--dark-brown);
+            box-shadow: 0 0 20px var(--gold);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        /* --- Game Screen --- */
+        .game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            color: var(--light-gold);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gold);
+        }
+
+        .game-area {
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .sentence-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .option-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            border: 1px solid var(--light-gold);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: right;
+        }
+
+        .option-btn:hover {
+            background-color: var(--gold);
+            color: var(--dark-brown);
+        }
+        .option-btn.correct {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        .option-btn.incorrect {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+        
+        .word-game-letters {
+            font-family: 'Lalezar', cursive;
+            font-size: 3rem;
+            letter-spacing: 10px;
+            color: var(--gold);
+            padding: 15px;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+
+        .word-input-container {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        #word-input {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid var(--gold);
+            background-color: var(--dark-brown);
+            color: var(--text-light);
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        #word-submit-btn {
+            padding: 10px 20px;
+        }
+        
+        .found-words-container {
+            width: 100%;
+            min-height: 80px;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-content: flex-start;
+        }
+        .found-word {
+            background-color: var(--gold);
+            color: var(--dark-brown);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        /* --- Game Over Screen --- */
+        .game-over-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            text-align: center;
+            flex-grow: 1;
+        }
+        .game-over-content h2 {
+            font-family: 'Lalezar', cursive;
+            font-size: 3rem;
+            color: #dc3545;
+            margin: 0;
+        }
+        .game-over-content p {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        
+        /* --- Modal --- */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--dark-brown);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid var(--gold);
+            color: var(--text-light);
+            font-size: 1.2rem;
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+        }
+
+        /* --- Animation for feedback --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <!-- Main Menu Screen -->
+        <div id="menu-screen" class="screen active">
+            <div class="header">
+                <svg class="settings-icon" viewBox="0 0 24 24">
+                    <path d="M19.4,12c0-0.2,0-0.4,0-0.6c0-0.2,0-0.4,0-0.6l2.1-1.6c0.2-0.1,0.2-0.4,0.1-0.6l-2-3.5c-0.1-0.2-0.4-0.3-0.6-0.2l-2.5,1 c-0.5-0.4-1-0.7-1.6-1l-0.4-2.7C14.4,2.2,14.2,2,14,2h-4C9.8,2,9.6,2.2,9.6,2.4L9.2,5.1C8.6,5.4,8.1,5.7,7.6,6.1l-2.5-1 C4.9,5,4.6,5.1,4.5,5.3l-2,3.5C2.4,9,2.4,9.3,2.6,9.4l2.1,1.6c0,0.2,0,0.4,0,0.6c0,0.2,0,0.4,0,0.6l-2.1,1.6 C2.4,14.7,2.4,15,2.5,15.2l2,3.5c0.1,0.2,0.4,0.3,0.6,0.2l2.5-1c0.5,0.4,1,0.7,1.6,1l0.4,2.7c0,0.2,0.2,0.4,0.4,0.4h4 c0.2,0,0.4-0.2,0.4-0.4l0.4-2.7c0.6-0.3,1.1-0.6,1.6-1l2.5,1c0.2,0.1,0.5,0,0.6-0.2l2-3.5c0.1-0.2,0.1-0.5-0.1-0.6L19.4,12z M12,15.5c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S13.9,15.5,12,15.5z"/>
+                </svg>
+                <div class="title-container">
+                    <div class="title-text">
+                        <h1>رویا</h1>
+                        <p>بالاترین رکورد: <span id="high-score">0</span></p>
+                    </div>
+                    <div class="title-box"></div>
+                </div>
+            </div>
+            <div class="menu-content">
+                <button id="start-btn" class="btn">شروع بازی</button>
+                <button id="bot-btn" class="btn">بازی با ربات</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="header game-header">
+                <div id="timer">زمان: ۰۰</div>
+                <div id="level">مرحله: ۱</div>
+                <div id="score">امتیاز: ۰</div>
+            </div>
+            <div class="game-area">
+                <!-- Content will be injected by JS -->
+            </div>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen">
+             <div class="game-over-content">
+                <h2>شکست!</h2>
+                <p>امتیاز نهایی شما: <span id="final-score">0</span></p>
+                <p>تلاش خوبی بود. دوباره امتحان کن!</p>
+                <button id="restart-btn" class="btn">بازی مجدد</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="coming-soon-modal" class="modal">
+        <div class="modal-content">
+            این بخش به زودی فعال می‌شود!
+        </div>
+    </div>
+
+
+    <script>
+        // --- DOM Elements ---
+        const screens = {
+            menu: document.getElementById('menu-screen'),
+            game: document.getElementById('game-screen'),
+            gameOver: document.getElementById('game-over-screen'),
+        };
+        const highScoreEl = document.getElementById('high-score');
+        const startBtn = document.getElementById('start-btn');
+        const botBtn = document.getElementById('bot-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const scoreEl = document.getElementById('score');
+        const timerEl = document.getElementById('timer');
+        const levelEl = document.getElementById('level');
+        const gameArea = document.querySelector('#game-screen .game-area');
+        const finalScoreEl = document.getElementById('final-score');
+        const comingSoonModal = document.getElementById('coming-soon-modal');
+
+        // --- Game State & Config ---
+        let score = 0;
+        let highScore = localStorage.getItem('royaHighScore') || 0;
+        let level = 1;
+        let sentenceGameRound = 0;
+        let gameTimerInterval;
+
+        const SENTENCE_GAME_ROUNDS = 4;
+
+        // --- Game Data ---
+        const sentenceData = [
+            {
+                correct: "آسمان آبی و ابرها سفید هستند.",
+                options: ["آسمان سفید و ابرها آبی هستند.", "زمین آبی و آسمان سبز است.", "خورشید در شب می‌تابد."]
+            },
+            {
+                correct: "موفقیت نتیجه تلاش و پشتکار است.",
+                options: ["موفقیت نتیجه شانس است.", "تلاش همیشه به شکست می‌انجامد.", "پشتکار اهمیتی ندارد."]
+            },
+            {
+                correct: "کتاب‌ها بهترین دوستان انسان هستند.",
+                options: ["کتاب‌ها هیچ فایده‌ای ندارند.", "دوستان انسان دشمنان او هستند.", "تلویزیون بهترین دوست انسان است."]
+            },
+            {
+                correct: "برای رسیدن به رویاهایت باید جنگید.",
+                options: ["رویاها خود به خود محقق می‌شوند.", "جنگیدن برای رویاها بی‌فایده است.", "رویاها فقط در خواب وجود دارند."]
+            },
+             {
+                correct: "قطره قطره جمع گردد وانگهی دریا شود.",
+                options: ["دریاها همیشه پر از آب هستند.", "قطره‌ها نمی‌توانند دریا بسازند.", "جمع کردن آب کار بیهوده‌ای است."]
+            },
+            {
+                correct: "یادگیری یک سفر بی‌پایان است.",
+                options: ["یادگیری در جوانی تمام می‌شود.", "سفر کردن همیشه با هواپیماست.", "بی‌پایان بودن خسته‌کننده است."]
+            }
+        ];
+        
+        const wordData = [
+            { letters: "ا ب ر ت", words: ["ابر", "ربات", "ترب", "بار"] },
+            { letters: "م د ر س ه", words: ["مدرسه", "مرد", "سدر", "سرد", "درس"] },
+            { letters: "ق ل م", words: ["قلم", "لقم"] },
+            { letters: "ک ت ا ب", words: ["کتاب", "کات", "باک", "تاب"] }
+        ];
+        let currentWordData;
+        let foundWords;
+
+
+        // --- Functions ---
+
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(screen => screen.classList.remove('active'));
+            if (screens[screenName]) {
+                screens[screenName].classList.add('active');
+            }
+        }
+
+        function updateScore(newScore) {
+            score = newScore;
+            scoreEl.textContent = `امتیاز: ${score}`;
+        }
+        
+        function updateLevel(newLvl) {
+            level = newLvl;
+            levelEl.textContent = `مرحله: ${level}`;
+        }
+
+        function updateHighScore() {
+            highScoreEl.textContent = highScore;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('royaHighScore', highScore);
+                highScoreEl.textContent = highScore;
+            }
+        }
+
+        function resetGame() {
+            updateScore(0);
+            sentenceGameRound = 0;
+            clearInterval(gameTimerInterval);
+            timerEl.style.display = 'none';
+            updateLevel(1);
+        }
+
+        function startGame() {
+            resetGame();
+            switchScreen('game');
+            startSentenceGame();
+        }
+
+        function gameOver() {
+            clearInterval(gameTimerInterval);
+            finalScoreEl.textContent = score;
+            updateHighScore();
+            switchScreen('gameOver');
+        }
+        
+        // --- Sentence Game Logic ---
+
+        function startSentenceGame() {
+            sentenceGameRound = 0;
+            timerEl.style.display = 'none'; // No timer for this game
+            nextSentenceRound();
+        }
+
+        function nextSentenceRound() {
+            if (sentenceGameRound >= SENTENCE_GAME_ROUNDS) {
+                // Game 1 finished, start Game 2
+                startWordGame();
+                return;
+            }
+            sentenceGameRound++;
+            
+            const data = sentenceData[Math.floor(Math.random() * sentenceData.length)];
+            
+            gameArea.innerHTML = `
+                <div class="sentence-display">${data.correct}</div>
+                <p>جمله را به خاطر بسپارید...</p>
+            `;
+            
+            const showDuration = Math.max(1500, 4500 - (level * 250)); // Duration decreases with level
+
+            setTimeout(() => {
+                showSentenceOptions(data);
+            }, showDuration);
+        }
+        
+        function showSentenceOptions(data) {
+            const allOptions = [data.correct, ...data.options].sort(() => Math.random() - 0.5);
+            
+            gameArea.innerHTML = `
+                <p>کدام جمله صحیح بود؟</p>
+                <div class="options-grid">
+                    ${allOptions.map(opt => `<button class="option-btn">${opt}</button>`).join('')}
+                </div>
+            `;
+            
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.addEventListener('click', () => checkSentenceAnswer(btn, btn.textContent, data.correct));
+            });
+        }
+        
+        function checkSentenceAnswer(button, selected, correct) {
+             document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+            
+            if (selected === correct) {
+                button.classList.add('correct');
+                updateScore(score + 10);
+                setTimeout(nextSentenceRound, 1000);
+            } else {
+                button.classList.add('incorrect');
+                button.parentElement.classList.add('shake');
+                 document.querySelectorAll('.option-btn').forEach(btn => {
+                    if (btn.textContent === correct) btn.classList.add('correct');
+                });
+                setTimeout(gameOver, 2000);
+            }
+        }
+        
+        // --- Word Game Logic ---
+        function startWordGame() {
+            currentWordData = wordData[Math.floor(Math.random() * wordData.length)];
+            foundWords = [];
+            
+            gameArea.innerHTML = `
+                <p>با حروف زیر کلمه بسازید:</p>
+                <div class="word-game-letters">${currentWordData.letters}</div>
+                <div class="word-input-container">
+                    <input type="text" id="word-input" placeholder="کلمه خود را بنویسید...">
+                    <button id="word-submit-btn" class="btn">ثبت</button>
+                </div>
+                <div class="found-words-container"></div>
+            `;
+            
+            document.getElementById('word-submit-btn').addEventListener('click', submitWord);
+            document.getElementById('word-input').addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') submitWord();
+            });
+            
+            const gameDuration = Math.max(30, 60 - (level * 3)); // Duration decreases with level
+            startTimer(gameDuration);
+        }
+        
+        function submitWord() {
+            const input = document.getElementById('word-input');
+            const word = input.value.trim();
+            
+            if (!word) return;
+            
+            if (foundWords.includes(word)) {
+                // Already found
+                input.classList.add('shake');
+                setTimeout(() => input.classList.remove('shake'), 300);
+            } else if (currentWordData.words.includes(word)) {
+                // Correct word
+                foundWords.push(word);
+                updateScore(score + 5);
+                
+                const foundWordsContainer = document.querySelector('.found-words-container');
+                foundWordsContainer.innerHTML += `<span class="found-word">${word}</span>`;
+                
+                if(foundWords.length === currentWordData.words.length){
+                    // All words found, move to next round (back to sentence game)
+                    clearInterval(gameTimerInterval);
+                     setTimeout(() => {
+                        // Bonus points for finishing early
+                        updateScore(score + 25); 
+                        updateLevel(level + 1);
+                        startSentenceGame();
+                     }, 1500);
+                }
+            } else {
+                // Incorrect word
+                input.classList.add('shake');
+                setTimeout(() => input.classList.remove('shake'), 300);
+            }
+            
+            input.value = '';
+            input.focus();
+        }
+
+        function startTimer(duration) {
+            timerEl.style.display = 'block';
+            let time = duration;
+            
+            function updateTimerDisplay() {
+                timerEl.textContent = `زمان: ${time.toString().padStart(2, '0')}`;
+            }
+            
+            updateTimerDisplay();
+            
+            gameTimerInterval = setInterval(() => {
+                time--;
+                updateTimerDisplay();
+                if (time <= 0) {
+                    clearInterval(gameTimerInterval);
+                    if (foundWords.length > 0) {
+                        // If they found at least one word, let them pass
+                        updateLevel(level + 1);
+                        startSentenceGame();
+                    } else {
+                        gameOver();
+                    }
+                }
+            }, 1000);
+        }
+
+        // --- Event Listeners ---
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', startGame);
+        botBtn.addEventListener('click', () => {
+            comingSoonModal.classList.add('show');
+            setTimeout(() => {
+                comingSoonModal.classList.remove('show');
+            }, 2000);
+        });
+
+        // --- Initial Load ---
+        function init() {
+            updateHighScore();
+            switchScreen('menu');
+        }
+
+        init();
+    </script>
+</body>
+</html>
