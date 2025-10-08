@@ -8,38 +8,56 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        /* --- CSS Variables for Theming (Default: Brown-Gold) --- */
         :root {
-            --brown: #4a2c2a;
-            --gold: #d4af37;
-            --light-gold: #f0e68c;
-            --dark-brown: #3b2220;
-            --text-light: #f5f5f5;
-            --mid-dark: #2c1a18; /* رنگ جدید برای پس زمینه دکمه های برجسته */
+            --theme-bg-main: #3b2220;
+            --theme-bg-secondary: #4a2c2a;
+            --theme-text-main: #f5f5f5;
+            --theme-highlight: #d4af37; /* Gold */
+            --theme-light-highlight: #f0e68c; /* Light Gold */
+            --theme-mid-dark: #2c1a18;
+            --theme-exit-color: #ff6b6b;
+            --theme-correct-color: #28a745;
+            --theme-incorrect-color: #dc3545;
+            --theme-shadow-color: rgba(212, 175, 55, 0.5);
+        }
+
+        /* Blue-Gold Theme Definition */
+        .blue-gold-theme {
+            --theme-bg-main: #1a237e; /* Deep Blue */
+            --theme-bg-secondary: #283593;
+            --theme-text-main: #e8eaf6;
+            --theme-highlight: #ffcc00; /* Rich Gold */
+            --theme-light-highlight: #ffee58;
+            --theme-mid-dark: #12195f;
+            --theme-exit-color: #ff5252;
+            --theme-correct-color: #4caf50;
+            --theme-incorrect-color: #f44336;
+            --theme-shadow-color: rgba(255, 204, 0, 0.5);
         }
 
         body {
             font-family: 'Vazirmatn', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--dark-brown);
-            color: var(--text-light);
+            background-color: var(--theme-bg-main);
+            color: var(--theme-text-main);
             display: flex;
             justify-content: center;
             align-items: center;
-            /* استفاده از min-height برای اطمینان از پوشش کامل صفحه */
             min-height: 100vh;
             overflow: hidden;
             perspective: 1000px;
+            transition: background-color 0.5s ease;
         }
 
         .game-container {
             width: 95%;
             max-width: 450px;
-            /* ارتفاع 100% viewport برای موبایل */
-            height: 100vh; 
+            height: 100vh;
             max-height: 800px;
-            background-color: var(--dark-brown);
-            padding: 0; 
+            background-color: var(--theme-bg-main);
+            padding: 0;
             border-radius: 20px;
             box-sizing: border-box;
             position: relative;
@@ -49,7 +67,8 @@
         /* --- Screens --- */
         .screen {
             position: absolute;
-            padding: 20px; 
+            padding: 20px;
+            padding-top: 40px;
             top: 0;
             left: 0;
             right: 0;
@@ -57,12 +76,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* پیش‌فرض: محتوا از بالا شروع شود */
-            justify-content: flex-start; 
+            justify-content: flex-start;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.5s ease, transform 0.5s ease;
             transform: scale(0.95);
+            z-index: 10;
         }
 
         .screen.active {
@@ -70,29 +89,72 @@
             visibility: visible;
             transform: scale(1);
         }
-        
-        /* --- Menu Specific Layout Override (برای توزیع و مرکزیت) --- */
-        #menu-screen {
-            /* تغییر مهم: توزیع فضا بین هدر، دکمه‌ها و فوتر */
-            justify-content: space-between; 
-            /* *** تغییر اعمال شده: افزایش padding-top برای پایین آوردن عناصر بالا *** */
-            padding-top: 60px; /* افزایش از 30px به 60px */
-            padding-bottom: 20px; 
+
+        /* --- Theme Transition Overlay (NEW: Shiny Slide from Top Right) --- */
+        #theme-transition-overlay {
+            position: absolute;
+            /* Start off-screen top-right (relative to its initial position) */
+            top: -150%; 
+            right: -150%; 
+            width: 300%; 
+            height: 300%;
+            z-index: 2000;
+            pointer-events: none;
+            
+            /* Rotate to create a diagonal wipe */
+            transform: translate(100%, -100%) rotate(45deg);
+            
+            /* Placeholder background color (will be set in JS to the new theme color) */
+            background-color: transparent; 
+            
+            /* Initial state is hidden (managed by JS, but also ensure fast transition out is possible) */
+            transition: transform 0.8s cubic-bezier(0.86, 0, 0.07, 1); /* Energetic, custom curve */
         }
 
-        /* --- Header: Top Elements (Settings/Title/Score) --- */
+        /* Shine effect attached to the overlay */
+        #theme-transition-overlay::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Shiny diagonal gradient using theme highlight colors */
+            background: linear-gradient(
+                135deg, 
+                var(--theme-highlight) 0%, 
+                var(--theme-light-highlight) 10%, 
+                var(--theme-highlight) 20%
+            );
+            opacity: 0.9; /* Make it very shiny */
+            transition: opacity 0.8s;
+        }
+
+        /* State when transition is active (slides the large, rotated element into view) */
+        .game-container.theme-wipe-active #theme-transition-overlay {
+            transform: translate(0, 0) rotate(45deg);
+        }
+
+        /* --- Menu Specific Layout Override --- */
+        #menu-screen {
+            justify-content: space-between;
+            padding-top: 60px;
+            padding-bottom: 20px;
+        }
+
+        /* --- Header: Top Elements --- */
         .header {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
-        .settings-icon, .exit-icon {
+
+        .settings-icon, .exit-icon, .back-icon {
             width: 30px;
             height: 30px;
             cursor: pointer;
-            fill: var(--gold);
+            fill: var(--theme-highlight);
             transition: transform 0.3s;
             -webkit-tap-highlight-color: transparent;
         }
@@ -101,9 +163,10 @@
         }
         .exit-icon:hover {
             transform: scale(1.1);
-            fill: #ff6b6b;
+            fill: var(--theme-exit-color);
         }
-        
+
+        /* --- Title Styles --- */
         .title-container {
             display: flex;
             align-items: center;
@@ -113,32 +176,26 @@
         .title-box {
             width: 40px;
             height: 40px;
-            /* رنگ طلایی و قهوه‌ای مایل به مربع */
-            background: linear-gradient(45deg, var(--brown) 50%, var(--gold) 50%);
+            background: linear-gradient(45deg, var(--theme-bg-secondary) 50%, var(--theme-highlight) 50%);
             border-radius: 8px;
-        }
-        
-        .title-text {
-            text-align: right;
         }
 
         .title-text h1 {
             font-family: 'Lalezar', cursive;
             font-size: 2rem;
             margin: 0;
-            color: var(--gold);
+            color: var(--theme-highlight);
         }
 
         .title-text p {
             font-size: 0.8rem;
             margin: 0;
-            color: var(--light-gold);
+            color: var(--theme-light-highlight);
         }
 
-        /* --- Menu Content: Centered Buttons (مرکزیت کامل دکمه‌ها) --- */
+        /* --- Button Styles --- */
         .menu-content {
-            /* تغییر مهم: margin: auto دکمه‌ها را بین هدر و فوتر به صورت عمودی مرکز می‌کند */
-            margin: auto; 
+            margin: auto;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -151,18 +208,16 @@
             font-size: 1.2rem;
             padding: 15px 40px;
             border-radius: 50px;
-            border: 2px solid var(--gold);
-            /* --- اضافه کردن بک‌گراند به دکمه‌ها --- */
-            background-color: var(--mid-dark); 
-            color: var(--gold);
-            /* --- پایان تغییر مهم --- */
+            border: 2px solid var(--theme-highlight);
+            background-color: var(--theme-mid-dark);
+            color: var(--theme-highlight);
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
             min-width: 200px;
             -webkit-tap-highlight-color: transparent;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); /* افزایش سایه برای برجستگی */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         .btn::before {
@@ -172,214 +227,165 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(212, 175, 55, 0.4), transparent);
+            background: linear-gradient(120deg, transparent, var(--theme-highlight), transparent);
+            opacity: 0.4;
             transition: left 0.7s;
         }
-        
+
         .btn:hover {
-            background-color: var(--gold);
-            color: var(--dark-brown);
-            box-shadow: 0 0 25px var(--gold);
-            transform: translateY(-2px); /* افکت کوچک در هنگام هاور */
+            background-color: var(--theme-highlight);
+            color: var(--theme-bg-main);
+            box-shadow: 0 0 25px var(--theme-shadow-color);
+            transform: translateY(-2px);
         }
 
         .btn:hover::before {
             left: 100%;
         }
-        
-        /* --- Footer Menu: Bottom Elements (Challenge/Rewards) --- */
+
+        /* --- Footer Menu --- */
         .footer-menu {
             width: 100%;
             display: flex;
             justify-content: space-around;
             padding: 10px 0;
-            background-color: var(--brown); /* رنگ پس زمینه متمایزتر برای فوتر */
+            background-color: var(--theme-bg-secondary);
             border-radius: 15px;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.7); 
-            /* نیازی به margin-top: auto نیست زیرا والد از space-between استفاده می‌کند */
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.7);
         }
         .footer-btn {
             background: none;
             border: none;
-            color: var(--light-gold);
+            color: var(--theme-light-highlight);
             opacity: 0.8;
-            cursor: pointer; 
+            cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
             font-size: 1rem;
             font-family: 'Vazirmatn', sans-serif;
             transition: opacity 0.3s, transform 0.3s;
-        }
-        .footer-btn:hover {
-            opacity: 1;
-            transform: scale(1.05);
+            line-height: 1.2; 
         }
         .footer-btn small {
-            font-size: 0.7rem;
+            font-size: 0.6rem;
+            color: var(--theme-highlight);
+            margin-top: 2px;
         }
 
+        /* --- Settings Screen Specific Styles --- */
+        #settings-screen {
+            justify-content: flex-start;
+        }
+        .settings-content {
+            width: 100%;
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        .setting-section h2 {
+            font-family: 'Lalezar', cursive;
+            font-size: 1.5rem;
+            color: var(--theme-highlight);
+            border-bottom: 1px solid var(--theme-bg-secondary);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .setting-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        .setting-option-btn {
+            background-color: var(--theme-bg-secondary);
+            color: var(--theme-text-main);
+            border: 1px solid var(--theme-highlight);
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            font-family: 'Vazirmatn', sans-serif;
+            font-weight: 700;
+        }
+        .setting-option-btn.active-setting {
+            background-color: var(--theme-highlight);
+            color: var(--theme-bg-main);
+            transform: scale(1.05);
+        }
 
-        /* --- Game Screen --- */
-        .game-header {
+        /* --- Toggle Switch Style for Settings (Only for Music now) --- */
+        .setting-item {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 1.2rem;
-            color: var(--light-gold);
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--gold);
-            margin-bottom: 20px; 
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--theme-bg-secondary);
         }
 
-        .game-area {
-            flex-grow: 1;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            text-align: center;
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
         }
-
-        /* بقیه استایل‌های بازی بدون تغییر باقی می‌مانند */
-        .sentence-display {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-light);
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            min-height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .toggle-switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
         }
-
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            width: 100%;
-        }
-        
-        .option-btn {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--text-light);
-            border: 1px solid var(--light-gold);
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 1rem;
+        .slider {
+            position: absolute;
             cursor: pointer;
-            transition: background-color 0.3s;
-            text-align: right;
-            -webkit-tap-highlight-color: transparent;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--theme-bg-secondary);
+            transition: .4s;
+            border-radius: 34px;
+            border: 2px solid var(--theme-highlight);
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 2px;
+            background-color: var(--theme-highlight);
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--theme-highlight);
+            border-color: var(--theme-bg-secondary);
+        }
+        input:checked + .slider:before {
+            background-color: var(--theme-bg-secondary);
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
         }
 
-        .option-btn:hover {
-            background-color: var(--gold);
-            color: var(--dark-brown);
-        }
-        .option-btn.correct {
-            background-color: #28a745;
-            border-color: #28a745;
-            color: white;
-        }
-        .option-btn.incorrect {
-            background-color: #dc3545;
-            border-color: #dc3545;
-            color: white;
-        }
-        
-        .word-game-letters {
-            font-family: 'Lalezar', cursive;
-            font-size: 3rem;
-            letter-spacing: 10px;
-            color: var(--gold);
-            padding: 15px;
-            background-color: rgba(0,0,0,0.2);
-            border-radius: 10px;
-        }
-
-        .word-input-container {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-        }
-        
-        #word-input {
-            flex-grow: 1;
-            padding: 10px;
-            border-radius: 8px;
-            border: 2px solid var(--gold);
-            background-color: var(--dark-brown);
-            color: var(--text-light);
-            font-size: 1.2rem;
-            text-align: center;
-        }
-        
-        #word-submit-btn {
-            padding: 10px 20px;
-        }
-        
-        .found-words-container {
-            width: 100%;
-            min-height: 80px;
-            background-color: rgba(0,0,0,0.2);
-            border-radius: 10px;
-            padding: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-content: flex-start;
-        }
-        .found-word {
-            background-color: var(--gold);
-            color: var(--dark-brown);
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-
-        /* --- Game Over Screen --- */
-        .game-over-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            text-align: center;
-            flex-grow: 1;
-            height: 100%; 
-        }
-        .game-over-content h2 {
-            font-family: 'Lalezar', cursive;
-            font-size: 3rem;
-            color: #dc3545;
-            margin: 0;
-        }
-        .game-over-content p {
-            font-size: 1.2rem;
-            margin: 0;
-        }
-        
-        /* --- Modal --- */
+        /* --- Modal for "Coming Soon" --- */
         .modal {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.6);
             display: flex;
             justify-content: center;
             align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-            z-index: 1000;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
         .modal.show {
@@ -388,88 +394,77 @@
         }
 
         .modal-content {
-            background-color: var(--dark-brown);
-            padding: 30px;
+            background-color: var(--theme-bg-secondary);
+            padding: 40px;
             border-radius: 15px;
-            border: 2px solid var(--gold);
-            color: var(--text-light);
-            font-size: 1.2rem;
-            box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+            text-align: center;
+            font-size: 1.5rem;
+            font-family: 'Lalezar', cursive;
+            color: var(--theme-highlight);
+            border: 3px solid var(--theme-highlight);
+            box-shadow: 0 0 40px var(--theme-shadow-color);
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
         }
 
-        /* --- Animation for feedback --- */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+        /* موشن گرافیک برای پنل "به زودی" */
+        .modal-coming-soon::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            z-index: -1;
+            border-radius: 20px;
+            animation: pulse 1.5s infinite alternate;
         }
-        .shake { animation: shake 0.3s ease-in-out; }
 
-        /* --- Particle Animation --- */
-        #particle-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            pointer-events: none;
-            z-index: 0;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8) translateY(-20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
-        .particle {
-            position: absolute;
-            bottom: -20px;
-            background-color: var(--gold);
-            border-radius: 50%;
-            opacity: 0;
-            animation: floatUp 10s infinite ease-in;
+
+        @keyframes pulse {
+            from { box-shadow: 0 0 10px var(--theme-highlight); }
+            to { box-shadow: 0 0 25px var(--theme-highlight), 0 0 40px var(--theme-shadow-color); }
         }
-        @keyframes floatUp {
-            0% {
-                transform: translateY(0);
-                opacity: 0;
-            }
-            10%, 90% {
-                opacity: 0.7;
-            }
-            100% {
-                transform: translateY(-100vh);
-                opacity: 0;
-            }
-        }
+
+
     </style>
 </head>
 <body>
 
-    <div class="game-container">
+    <div class="game-container" id="game-container">
+        <!-- Overlay for attractive theme transition -->
+        <div id="theme-transition-overlay"></div>
+
         <!-- Main Menu Screen -->
         <div id="menu-screen" class="screen active">
-             <div id="particle-container"></div>
-            
-            <!-- Header: Now guaranteed to be visible due to increased padding on #menu-screen -->
+            <div id="particle-container"></div>
+
             <div class="header" style="z-index: 1;">
-                <svg class="settings-icon" viewBox="0 0 24 24" onclick="showComingSoon()">
+                <svg id="settings-icon-btn" class="settings-icon" viewBox="0 0 24 24" onclick="switchScreen('settings')">
                     <path d="M19.4,12c0-0.2,0-0.4,0-0.6c0-0.2,0-0.4,0-0.6l2.1-1.6c0.2-0.1,0.2-0.4,0.1-0.6l-2-3.5c-0.1-0.2-0.4-0.3-0.6-0.2l-2.5,1 c-0.5-0.4-1-0.7-1.6-1l-0.4-2.7C14.4,2.2,14.2,2,14,2h-4C9.8,2,9.6,2.2,9.6,2.4L9.2,5.1C8.6,5.4,8.1,5.7,7.6,6.1l-2.5-1 C4.9,5,4.6,5.1,4.5,5.3l-2,3.5C2.4,9,2.4,9.3,2.6,9.4l2.1,1.6c0,0.2,0,0.4,0,0.6c0,0.2,0,0.4,0,0.6l-2.1,1.6 C2.4,14.7,2.4,15,2.5,15.2l2,3.5c0.1,0.2,0.4,0.3,0.6,0.2l2.5-1c0.5,0.4,1,0.7,1.6,1l0.4,2.7c0,0.2,0.2,0.4,0.4,0.4h4 c0.2,0,0.4-0.2,0.4-0.4l0.4-2.7c0.6-0.3,1.1-0.6,1.6-1l2.5,1c0.2,0.1,0.5,0,0.6-0.2l2-3.5c0.1-0.2,0.1-0.5-0.1-0.6L19.4,12z M12,15.5c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S13.9,15.5,12,15.5z"/>
                 </svg>
                 <div class="title-container">
                     <div class="title-text">
-                        <h1>رویا</h1>
-                        <p>بالاترین رکورد: <span id="high-score">0</span></p>
+                        <h1 id="menu-title-h1">رویا</h1>
+                        <p id="menu-high-score-text">بالاترین رکورد: <span id="high-score">0</span></p>
                     </div>
                     <div class="title-box"></div>
                 </div>
             </div>
-            
-            <!-- Menu Content: Now vertically centered between Header and Footer -->
+
             <div class="menu-content" style="z-index: 1;">
                 <button id="start-btn" class="btn">شروع بازی</button>
-                <button id="bot-btn" class="btn" onclick="showComingSoon()">بازی با ربات</button>
+                <button id="bot-btn" class="btn">بازی با ربات</button>
             </div>
-            
-            <!-- Footer Menu: Pushed to the very bottom by justify-content: space-between -->
+
             <div class="footer-menu" style="z-index: 1;">
-                <button class="footer-btn" onclick="showComingSoon()">چالش<small>به زودی</small></button>
-                <button class="footer-btn" onclick="showComingSoon()">جوایز<small>به زودی</small></button>
+                <button class="footer-btn" id="challenge-btn">چالش<small>به زودی</small></button>
+                <button class="footer-btn" id="rewards-btn">جوایز<small>به زودی</small></button>
             </div>
         </div>
 
@@ -479,39 +474,98 @@
                 <svg id="exit-btn" class="exit-icon" viewBox="0 0 24 24">
                     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                 </svg>
-                <div id="level">مرحله: ۱</div>
                 <div id="score">امتیاز: ۰</div>
+                <div id="level">مرحله: ۱</div>
                 <div id="timer">زمان: ۰۰</div>
             </div>
             <div class="game-area">
                 <!-- Content will be injected by JS -->
             </div>
         </div>
-        
+
         <!-- Game Over Screen -->
         <div id="game-over-screen" class="screen">
-              <div class="game-over-content">
-                <h2>شکست!</h2>
-                <p>امتیاز نهایی شما: <span id="final-score">0</span></p>
-                <p>تلاش خوبی بود. دوباره امتحان کن!</p>
+             <div class="game-over-content">
+                <h2 id="game-over-title">شکست!</h2>
+                <p id="game-over-score-text">امتیاز نهایی شما: <span id="final-score">0</span></p>
+                <p id="game-over-message">تلاش خوبی بود. دوباره امتحان کن!</p>
                 <button id="restart-btn" class="btn">بازی مجدد</button>
             </div>
         </div>
+
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="screen">
+            <div class="header" style="justify-content: flex-start; width: 100%;">
+                <svg class="back-icon" viewBox="0 0 24 24" onclick="switchScreen('menu')">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+                <h1 id="settings-title" style="margin: 0 0 0 20px; font-size: 1.8rem; color: var(--theme-highlight);">تنظیمات</h1>
+            </div>
+
+            <div class="settings-content">
+                
+                <!-- NEW: Sound and Music Toggles (Removed SFX toggle) -->
+                <div class="setting-section">
+                    <h2 id="sound-heading">صدا و بازخورد</h2>
+                    <div class="setting-options" style="flex-direction: column;">
+                        
+                        <div class="setting-item">
+                            <span id="music-label">موزیک پس‌زمینه</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="music-toggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <!-- افکت‌های صوتی بنا به درخواست کاربر حذف شد. -->
+                        
+                    </div>
+                </div>
+
+                <!-- Theme Customization Section -->
+                <div class="setting-section">
+                    <h2 id="customization-heading">شخصی‌سازی (تم)</h2>
+                    <div class="setting-options" id="theme-options">
+                        <button class="setting-option-btn active-setting" data-theme="brown-gold" data-lang-fa="قهوه‌ای طلایی" data-lang-en="Brown Gold">قهوه‌ای طلایی</button>
+                        <button class="setting-option-btn" data-theme="blue-gold" data-lang-fa="آبی طلایی" data-lang-en="Blue Gold">آبی طلایی</button>
+                    </div>
+                </div>
+
+                <!-- Language Selection Section -->
+                <div class="setting-section">
+                    <h2 id="language-heading">زبان بازی</h2>
+                    <div class="setting-options" id="language-options">
+                        <button class="setting-option-btn active-setting" data-lang-code="fa" data-lang-fa="فارسی" data-lang-en="Persian">فارسی</button>
+                        <button class="setting-option-btn" data-lang-code="en" data-lang-fa="انگلیسی" data-lang-en="English">English</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div id="coming-soon-modal" class="modal">
-        <div class="modal-content">
-            این بخش به زودی فعال می‌شود!
+
+    <!-- General Modal for temporary messages -->
+    <div id="message-modal" class="modal">
+        <div class="modal-content modal-coming-soon" id="modal-content">
+            <!-- Content will be set by JS -->
         </div>
     </div>
 
 
     <script>
+        // --- Global State & Configuration ---
+        const gameContainer = document.getElementById('game-container');
+        const themeTransitionOverlay = document.getElementById('theme-transition-overlay');
+        let currentTheme = localStorage.getItem('royaTheme') || 'brown-gold';
+        let currentLang = localStorage.getItem('royaLang') || 'fa';
+        let isMusicOn = localStorage.getItem('royaMusic') !== 'false'; // Initialize music state
+        // SFX state removed based on user request.
+
         // --- DOM Elements ---
         const screens = {
             menu: document.getElementById('menu-screen'),
             game: document.getElementById('game-screen'),
             gameOver: document.getElementById('game-over-screen'),
+            settings: document.getElementById('settings-screen'),
         };
         const highScoreEl = document.getElementById('high-score');
         const startBtn = document.getElementById('start-btn');
@@ -522,7 +576,12 @@
         const levelEl = document.getElementById('level');
         const gameArea = document.querySelector('#game-screen .game-area');
         const finalScoreEl = document.getElementById('final-score');
-        const comingSoonModal = document.getElementById('coming-soon-modal');
+        const messageModal = document.getElementById('message-modal');
+        const modalContent = document.getElementById('modal-content');
+        
+        // Settings Toggles
+        const musicToggle = document.getElementById('music-toggle');
+        // sfxToggle has been removed from the DOM and JS references.
 
         // --- Game State & Config ---
         let score = 0;
@@ -530,10 +589,71 @@
         let level = 1;
         let sentenceGameRound = 0;
         let gameTimerInterval;
+        let time = 0; 
 
         const SENTENCE_GAME_ROUNDS = 4;
 
-        // --- Game Data ---
+        // --- Translation Data (SFX label removed) ---
+        const translations = {
+            fa: {
+                title: "رویا",
+                highScore: "بالاترین رکورد: ",
+                start: "شروع بازی",
+                bot: "بازی با ربات",
+                challenge: "چالش",
+                rewards: "جوایز",
+                comingSoon: "این بخش به زودی با گرافیک و افکت‌های جذاب فعال می‌شود!",
+                level: "مرحله: ",
+                score: "امتیاز: ",
+                time: "زمان: ",
+                gameOverTitle: "شکست!",
+                gameOverScore: "امتیاز نهایی شما: ",
+                gameOverMessage: "تلاش خوبی بود. دوباره امتحان کن!",
+                restart: "بازی مجدد",
+                settings: "تنظیمات",
+                soundHeading: "صدا و بازخورد", 
+                musicLabel: "موزیک پس‌زمینه", 
+                // sfxLabel removed
+                customization: "شخصی‌سازی (تم)",
+                language: "زبان بازی",
+                readAndRemember: "جمله رو به دقت بخون و به خاطر بسپار:",
+                whichSentence: "کدام جمله صحیح بود؟",
+                makeWords: "با حروف زیر کلمه بسازید:",
+                writeWord: "کلمه خود را بنویسید...",
+                submit: "ثبت",
+                wordGameLetters: (letters) => `حروف: ${letters}`,
+            },
+            en: {
+                title: "Roya",
+                highScore: "High Score: ",
+                start: "Start Game",
+                bot: "Play with Bot",
+                challenge: "Challenge",
+                rewards: "Rewards",
+                comingSoon: "This feature will be available soon with attractive graphics and effects!",
+                level: "Level: ",
+                score: "Score: ",
+                time: "Time: ",
+                gameOverTitle: "Game Over!",
+                gameOverScore: "Your final score: ",
+                gameOverMessage: "Good try. Try again!",
+                restart: "Restart Game",
+                settings: "Settings",
+                soundHeading: "Sound and Feedback", 
+                musicLabel: "Background Music", 
+                // sfxLabel removed
+                customization: "Customization (Theme)",
+                language: "Game Language",
+                readAndRemember: "Read and remember the sentence carefully:",
+                whichSentence: "Which sentence was correct?",
+                makeWords: "Create words from the following letters:",
+                writeWord: "Write your word...",
+                submit: "Submit",
+                wordGameLetters: (letters) => `Letters: ${letters}`,
+            }
+        };
+
+        // --- Game Data (Rest of data remains the same) ---
         const sentenceData = [
             {
                 correct: "آسمان آبی و ابرها سفید هستند.",
@@ -551,7 +671,7 @@
                 correct: "برای رسیدن به رویاهایت باید جنگید.",
                 options: ["رویاها خود به خود محقق می‌شوند.", "جنگیدن برای رویاها بی‌فایده است.", "رویاها فقط در خواب وجود دارند."]
             },
-             {
+            {
                 correct: "قطره قطره جمع گردد وانگهی دریا شود.",
                 options: ["دریاها همیشه پر از آب هستند.", "قطره‌ها نمی‌توانند دریا بسازند.", "جمع کردن آب کار بیهوده‌ای است."]
             },
@@ -560,7 +680,7 @@
                 options: ["یادگیری در جوانی تمام می‌شود.", "سفر کردن همیشه با هواپیماست.", "بی‌پایان بودن خسته‌کننده است."]
             }
         ];
-        
+
         const wordData = [
             { letters: "ا ب ر ت", words: ["ابر", "ربات", "ترب", "بار"] },
             { letters: "م د ر س ه", words: ["مدرسه", "مرد", "سدر", "سرد", "درس"] },
@@ -571,270 +691,465 @@
         let foundWords;
 
 
-        // --- Functions ---
+        // --- UI & Utility Functions ---
 
+        /**
+         * Smoothly switches between game screens.
+         * @param {string} screenName - The name of the screen to activate ('menu', 'game', 'gameOver', 'settings').
+         */
         function switchScreen(screenName) {
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
             if (screens[screenName]) {
                 screens[screenName].classList.add('active');
             }
-            if(screenName === 'menu') {
-                // Ensure particles are only created/visible on the menu
-                createParticles();
-            } else {
-                    // Clear particles when switching away from menu
-                document.getElementById('particle-container').innerHTML = '';
-            }
+        }
+
+        /**
+         * Displays a temporary modal message.
+         * @param {string} messageKey - The key for the message in the translation object.
+         */
+        function showMessageModal(messageKey) {
+            const lang = translations[currentLang];
+            modalContent.textContent = lang[messageKey] || 'Message';
+
+            messageModal.classList.add('show');
+            
+            const closeModal = () => {
+                messageModal.classList.remove('show');
+                messageModal.removeEventListener('click', closeModal);
+            };
+
+            setTimeout(closeModal, 4000);
+            messageModal.addEventListener('click', closeModal);
+        }
+
+        /**
+         * Applies the selected theme and initiates the new shiny diagonal transition.
+         * @param {string} themeName - 'brown-gold' or 'blue-gold'.
+         */
+        function applyTheme(themeName) {
+            if (currentTheme === themeName) return;
+
+            const root = document.body;
+            const newThemeClass = themeName === 'brown-gold' ? '' : themeName + '-theme';
+
+            // 1. Get the new background color by temporarily applying the new class.
+            // This is a common trick to read CSS variables before they are visible.
+            const oldClasses = root.className;
+            root.className = newThemeClass;
+            const newBgColor = getComputedStyle(document.body).getPropertyValue('--theme-bg-main');
+            root.className = oldClasses; // Revert immediately
+
+            // 2. Set the overlay's background color to the NEW theme color for the wipe.
+            themeTransitionOverlay.style.backgroundColor = newBgColor;
+            
+            // 3. Start Wipe IN: Apply active class to the container.
+            // This triggers the CSS transition: transform: translate(0, 0) rotate(45deg);
+            gameContainer.classList.add('theme-wipe-active');
+            
+            // 4. Update the actual theme immediately so the background is correct *after* the wipe.
+            // We use a slight delay (50ms) to ensure the wipe has visually started first.
+            setTimeout(() => {
+                // Apply the new theme classes to the body
+                root.classList.remove('brown-gold-theme', 'blue-gold-theme');
+                if (themeName !== 'brown-gold') {
+                    root.classList.add(newThemeClass);
+                }
+                
+                // Update state
+                currentTheme = themeName;
+                localStorage.setItem('royaTheme', themeName);
+            }, 50); // Small delay to prioritize the visual wipe effect over the color change
+
+            // 5. End transition: After the animation is visibly complete (0.8s), reset the overlay.
+            setTimeout(() => {
+                gameContainer.classList.remove('theme-wipe-active');
+                
+                // Reset the overlay's position off-screen instantly so it's ready for the next use.
+                // We temporarily disable the transition for an instant "pop out" reset.
+                themeTransitionOverlay.style.transition = 'none';
+                themeTransitionOverlay.style.transform = 'translate(100%, -100%) rotate(45deg)';
+
+                // Re-enable transition after reset (for next transition)
+                setTimeout(() => {
+                    themeTransitionOverlay.style.transition = 'transform 0.8s cubic-bezier(0.86, 0, 0.07, 1)';
+                }, 50);
+
+                updateThemeButtons();
+            }, 850); // Slightly longer than the CSS transition (0.8s)
         }
         
-        function showComingSoon() {
-             comingSoonModal.classList.add('show');
-             setTimeout(() => {
-                 comingSoonModal.classList.remove('show');
-             }, 2000);
-        }
-
-        function updateScore(newScore) {
-            score = newScore;
-            scoreEl.textContent = `امتیاز: ${score}`;
+        /**
+         * Updates the active status of theme buttons in settings.
+         */
+        function updateThemeButtons() {
+            document.querySelectorAll('#theme-options .setting-option-btn').forEach(btn => {
+                btn.classList.remove('active-setting');
+                if (btn.dataset.theme === currentTheme) {
+                    btn.classList.add('active-setting');
+                }
+            });
         }
         
-        function updateLevel(newLvl) {
-            level = newLvl;
-            levelEl.textContent = `مرحله: ${level}`;
+        /**
+         * Updates the active status of language buttons in settings.
+         */
+        function updateLanguageButtons() {
+            document.querySelectorAll('#language-options .setting-option-btn').forEach(btn => {
+                btn.classList.remove('active-setting');
+                if (btn.dataset.langCode === currentLang) {
+                    btn.classList.add('active-setting');
+                }
+            });
         }
 
-        function updateHighScore() {
-            highScoreEl.textContent = highScore;
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('royaHighScore', highScore);
-                highScoreEl.textContent = highScore;
-            }
+
+        /**
+         * Updates all dynamic text content based on the current language setting.
+         */
+        function updateTextContent() {
+            const lang = translations[currentLang];
+            const htmlEl = document.querySelector('html');
+
+            // Set language attribute and direction
+            htmlEl.setAttribute('lang', currentLang);
+            htmlEl.setAttribute('dir', currentLang === 'fa' ? 'rtl' : 'ltr');
+
+            // Menu Screen
+            document.getElementById('menu-title-h1').textContent = lang.title;
+            document.getElementById('menu-high-score-text').textContent = lang.highScore + highScore;
+            startBtn.textContent = lang.start;
+            document.getElementById('bot-btn').textContent = lang.bot;
+            document.getElementById('challenge-btn').innerHTML = `${lang.challenge}<small>${lang.comingSoon.split(' ')[0]}</small>`;
+            document.getElementById('rewards-btn').innerHTML = `${lang.rewards}<small>${lang.comingSoon.split(' ')[0]}</small>`;
+
+            // Game Screen
+            scoreEl.textContent = lang.score + score;
+            levelEl.textContent = lang.level + level;
+            timerEl.textContent = lang.time + (gameTimerInterval ? (time + '').padStart(2, '0') : '00');
+            
+            // Game Over Screen
+            document.getElementById('game-over-title').textContent = lang.gameOverTitle;
+            document.getElementById('game-over-score-text').innerHTML = lang.gameOverScore + `<span id="final-score">${finalScoreEl.textContent}</span>`;
+            document.getElementById('game-over-message').textContent = lang.gameOverMessage;
+            restartBtn.textContent = lang.restart;
+
+            // Settings Screen
+            document.getElementById('settings-title').textContent = lang.settings;
+            document.getElementById('sound-heading').textContent = lang.soundHeading;
+            document.getElementById('music-label').textContent = lang.musicLabel;
+            // sfx-label removed
+            document.getElementById('customization-heading').textContent = lang.customization;
+            document.getElementById('language-heading').textContent = lang.language;
+
+            // Update theme buttons text
+            document.querySelectorAll('#theme-options .setting-option-btn').forEach(btn => {
+                btn.textContent = currentLang === 'fa' ? btn.dataset.langFa : btn.dataset.langEn;
+            });
+
+            // Update language buttons text
+            document.querySelectorAll('#language-options .setting-option-btn').forEach(btn => {
+                btn.textContent = currentLang === 'fa' ? btn.dataset.langFa : btn.dataset.langEn;
+            });
         }
 
-        function resetGame() {
-            updateScore(0);
-            sentenceGameRound = 0;
-            clearInterval(gameTimerInterval);
-            timerEl.style.display = 'none';
-            updateLevel(1);
-        }
+        // --- Game Logic Functions (Simplified for this file) ---
 
+        /**
+         * Initializes and starts the game.
+         */
         function startGame() {
-            resetGame();
+            score = 0;
+            level = 1;
+            sentenceGameRound = 0;
+            updateTextContent();
             switchScreen('game');
-            startSentenceGame();
+            startTimer();
+            startCurrentLevel();
+            // No SFX for starting the game as per request
         }
 
+        /**
+         * Ends the game and shows the game over screen.
+         */
         function gameOver() {
             clearInterval(gameTimerInterval);
             finalScoreEl.textContent = score;
-            updateHighScore();
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('royaHighScore', highScore);
+            }
+            updateTextContent();
             switchScreen('gameOver');
         }
-        
-        // --- Sentence Game Logic ---
 
-        function startSentenceGame() {
-            sentenceGameRound = 0;
-            timerEl.style.display = 'none'; // No timer for this game
-            nextSentenceRound();
-        }
-
-        function nextSentenceRound() {
-            if (sentenceGameRound >= SENTENCE_GAME_ROUNDS) {
-                // Game 1 finished, start Game 2
-                startWordGame();
-                return;
-            }
-            sentenceGameRound++;
-            
-            // Get a random unique sentence (or shuffle all options and pick first)
-            const availableData = sentenceData.slice().filter(d => !d.used); // Simple uniqueness check (not robust for production)
-            if(availableData.length === 0) {
-                 // If all used, restart the data set (for endless play)
-                 sentenceData.forEach(d => d.used = false);
-            }
-            const data = sentenceData[Math.floor(Math.random() * sentenceData.length)];
-            data.used = true;
-            
-            gameArea.innerHTML = `
-                <p>جمله رو به دقت بخون و به خاطر بسپار:</p>
-                <div class="sentence-display">${data.correct}</div>
-                
-            `;
-            
-            const showDuration = Math.max(1500, 4500 - (level * 250)); // Duration decreases with level
-
-            setTimeout(() => {
-                showSentenceOptions(data);
-            }, showDuration);
-        }
-        
-        function showSentenceOptions(data) {
-            const allOptions = [data.correct, ...data.options].sort(() => Math.random() - 0.5);
-            
-            gameArea.innerHTML = `
-                <p>کدام جمله صحیح بود؟</p>
-                <div class="options-grid">
-                    ${allOptions.map(opt => `<button class="option-btn">${opt}</button>`).join('')}
-                </div>
-            `;
-            
-            document.querySelectorAll('.option-btn').forEach(btn => {
-                btn.addEventListener('click', () => checkSentenceAnswer(btn, btn.textContent, data.correct));
-            });
-        }
-        
-        function checkSentenceAnswer(button, selected, correct) {
-            document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
-            
-            if (selected === correct) {
-                button.classList.add('correct');
-                updateScore(score + 10);
-                setTimeout(nextSentenceRound, 1000);
-            } else {
-                button.classList.add('incorrect');
-                button.parentElement.classList.add('shake');
-                 document.querySelectorAll('.option-btn').forEach(btn => {
-                     if (btn.textContent === correct) btn.classList.add('correct');
-                 });
-                setTimeout(gameOver, 2000);
-            }
-        }
-        
-        // --- Word Game Logic ---
-        function startWordGame() {
-            currentWordData = wordData[Math.floor(Math.random() * wordData.length)];
-            foundWords = [];
-            
-            gameArea.innerHTML = `
-                <p>با حروف زیر کلمه بسازید:</p>
-                <div class="word-game-letters">${currentWordData.letters}</div>
-                <div class="word-input-container">
-                    <input type="text" id="word-input" placeholder="کلمه خود را بنویسید..." dir="rtl">
-                    <button id="word-submit-btn" class="btn">ثبت</button>
-                </div>
-                <div class="found-words-container"></div>
-            `;
-            
-            document.getElementById('word-submit-btn').addEventListener('click', submitWord);
-            document.getElementById('word-input').addEventListener('keypress', (e) => {
-                if(e.key === 'Enter') submitWord();
-            });
-            
-            const gameDuration = Math.max(30, 60 - (level * 3)); // Duration decreases with level
-            startTimer(gameDuration);
-        }
-        
-        function submitWord() {
-            const input = document.getElementById('word-input');
-            const word = input.value.trim();
-            
-            if (!word) return;
-            
-            if (foundWords.includes(word)) {
-                // Already found
-                input.classList.add('shake');
-                setTimeout(() => input.classList.remove('shake'), 300);
-            } else if (currentWordData.words.includes(word)) {
-                // Correct word
-                foundWords.push(word);
-                // Score based on word length for better incentive
-                updateScore(score + (word.length * 3)); 
-                
-                const foundWordsContainer = document.querySelector('.found-words-container');
-                foundWordsContainer.innerHTML += `<span class="found-word">${word}</span>`;
-                
-                if(foundWords.length === currentWordData.words.length){
-                    // All words found, move to next round (back to sentence game)
-                    clearInterval(gameTimerInterval);
-                      setTimeout(() => {
-                          // Bonus points for finishing early
-                          updateScore(score + 25); 
-                          updateLevel(level + 1);
-                          startSentenceGame();
-                      }, 1500);
-                }
-            } else {
-                // Incorrect word
-                input.classList.add('shake');
-                setTimeout(() => input.classList.remove('shake'), 300);
-            }
-            
-            input.value = '';
-            input.focus();
-        }
-
-        function startTimer(duration) {
-            timerEl.style.display = 'block';
-            let time = duration;
-            
-            function updateTimerDisplay() {
-                // Convert seconds to MM:SS format if needed, but for simplicity, keeping SS
-                timerEl.textContent = `زمان: ${time.toString().padStart(2, '0')}`;
-            }
-            
-            updateTimerDisplay();
-            
+        /**
+         * Starts the game timer.
+         */
+        function startTimer() {
+            clearInterval(gameTimerInterval);
+            time = 0;
             gameTimerInterval = setInterval(() => {
-                time--;
-                updateTimerDisplay();
-                if (time <= 0) {
-                    clearInterval(gameTimerInterval);
-                    if (foundWords.length > 0) {
-                        // If they found at least one word, let them pass
-                        updateLevel(level + 1);
-                        startSentenceGame();
-                    } else {
-                        // If they found nothing, it's Game Over
-                        gameOver();
-                    }
+                time++;
+                timerEl.textContent = translations[currentLang].time + (time + '').padStart(2, '0');
+                if (time >= 60) {
+                    // Time up - simple game over condition
+                    gameOver();
                 }
             }, 1000);
         }
 
-        function createParticles() {
-            const container = document.getElementById('particle-container');
-            if (!container) return;
-            container.innerHTML = '';
-            const particleCount = 20;
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                const size = Math.random() * 4 + 1;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.animationDuration = `${Math.random() * 5 + 8}s`;
-                particle.style.animationDelay = `${Math.random() * 5}s`;
-                container.appendChild(particle);
+        /**
+         * Moves to the next level/round.
+         */
+        function nextRound() {
+            level++;
+            sentenceGameRound++;
+            updateTextContent();
+            if (sentenceGameRound >= SENTENCE_GAME_ROUNDS) {
+                // For simplicity, after sentence rounds, move to word game
+                startWordGame();
+            } else {
+                startSentenceGame();
             }
         }
 
-        // --- Event Listeners ---
-        startBtn.addEventListener('click', startGame);
-        restartBtn.addEventListener('click', startGame);
-        exitBtn.addEventListener('click', () => {
-            clearInterval(gameTimerInterval);
-            switchScreen('menu');
-        });
-        
-        // جایگزینی دکمه‌های غیرفعال با فراخوانی تابع showComingSoon
-        document.querySelectorAll('.footer-btn').forEach(btn => {
-             btn.addEventListener('click', showComingSoon);
-        });
-        document.querySelector('.settings-icon').addEventListener('click', showComingSoon);
-        document.getElementById('bot-btn').addEventListener('click', showComingSoon);
-
-        // --- Initial Load ---
-        function init() {
-            updateHighScore();
-            switchScreen('menu');
+        /**
+         * Utility to shuffle an array.
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
         }
 
-        init();
+
+        // --- Sentence Game Logic ---
+        let currentSentenceData;
+
+        function startSentenceGame() {
+            gameArea.innerHTML = '';
+            
+            // Select random data that hasn't been used recently (simple logic)
+            const availableData = sentenceData.filter(d => d !== currentSentenceData);
+            currentSentenceData = availableData[Math.floor(Math.random() * availableData.length)];
+            
+            // 1. Display the sentence to memorize (Read and Remember phase)
+            gameArea.innerHTML = `
+                <div class="game-task">
+                    <h3 style="color: var(--theme-light-highlight);">${translations[currentLang].readAndRemember}</h3>
+                    <div id="sentence-display" style="
+                        font-family: 'Lalezar', cursive; 
+                        font-size: 1.5rem; 
+                        margin: 20px; 
+                        padding: 15px; 
+                        border: 2px solid var(--theme-highlight); 
+                        border-radius: 10px; 
+                        background-color: var(--theme-bg-secondary);
+                    ">${currentSentenceData.correct}</div>
+                </div>
+            `;
+
+            // 2. Transition to Quiz phase after 3 seconds
+            setTimeout(() => {
+                showSentenceQuiz();
+            }, 3000);
+        }
+
+        function showSentenceQuiz() {
+            gameArea.innerHTML = '';
+
+            const allOptions = [...currentSentenceData.options, currentSentenceData.correct];
+            shuffleArray(allOptions);
+
+            const optionsHtml = allOptions.map(option => `
+                <button class="btn option-btn" data-value="${option}" style="min-width: 90%; margin-bottom: 15px; font-size: 1rem; padding: 10px 20px;">
+                    ${option}
+                </button>
+            `).join('');
+
+            gameArea.innerHTML = `
+                <div class="game-task" style="width: 100%; text-align: center;">
+                    <h3 style="color: var(--theme-highlight); margin-bottom: 30px;">${translations[currentLang].whichSentence}</h3>
+                    <div id="options-container" style="display: flex; flex-direction: column; align-items: center;">
+                        ${optionsHtml}
+                    </div>
+                </div>
+            `;
+
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => checkSentenceAnswer(e.target.dataset.value));
+            });
+        }
+
+        function checkSentenceAnswer(selectedSentence) {
+            const isCorrect = selectedSentence === currentSentenceData.correct;
+            const buttons = document.querySelectorAll('.option-btn');
+
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                const value = btn.dataset.value;
+                if (value === currentSentenceData.correct) {
+                    btn.style.backgroundColor = translations[currentLang].themeCorrectColor;
+                    btn.style.color = 'var(--theme-bg-main)';
+                } else if (value === selectedSentence && !isCorrect) {
+                    btn.style.backgroundColor = translations[currentLang].themeIncorrectColor;
+                }
+            });
+
+            if (isCorrect) {
+                score += 10;
+                setTimeout(nextRound, 1000);
+            } else {
+                setTimeout(gameOver, 1000);
+            }
+
+            scoreEl.textContent = translations[currentLang].score + score;
+        }
+
+
+        // --- Word Game Logic (Placeholder) ---
+
+        function startWordGame() {
+             gameArea.innerHTML = '';
+             // Simple logic for the first round of word game
+             currentWordData = wordData[Math.floor(Math.random() * wordData.length)];
+             foundWords = [];
+
+             gameArea.innerHTML = `
+                <div class="game-task" style="width: 100%; text-align: center;">
+                    <h3 style="color: var(--theme-highlight); margin-bottom: 10px;">${translations[currentLang].makeWords}</h3>
+                    <p style="font-family: 'Lalezar', cursive; font-size: 2rem; color: var(--theme-light-highlight);" id="word-letters">${translations[currentLang].wordGameLetters(currentWordData.letters)}</p>
+                    <input type="text" id="word-input" placeholder="${translations[currentLang].writeWord}" style="
+                        width: 80%; 
+                        padding: 10px; 
+                        margin: 20px 0; 
+                        border-radius: 5px; 
+                        border: 2px solid var(--theme-highlight); 
+                        background-color: var(--theme-bg-secondary); 
+                        color: var(--theme-text-main);
+                        text-align: center;
+                        font-size: 1.2rem;
+                    ">
+                    <button class="btn" id="word-submit-btn" style="min-width: 150px;">${translations[currentLang].submit}</button>
+                    <div id="found-words" style="margin-top: 20px; color: var(--theme-text-main); font-size: 1rem;">
+                        کلمات پیدا شده: 
+                    </div>
+                    <div id="message-area" style="margin-top: 10px; font-weight: bold;"></div>
+                </div>
+            `;
+
+            document.getElementById('word-submit-btn').addEventListener('click', checkWordAnswer);
+        }
+
+        function checkWordAnswer() {
+            const inputEl = document.getElementById('word-input');
+            const messageArea = document.getElementById('message-area');
+            const foundWordsEl = document.getElementById('found-words');
+            const word = inputEl.value.trim();
+            inputEl.value = '';
+            messageArea.textContent = '';
+
+            if (!word) return;
+
+            if (foundWords.includes(word)) {
+                messageArea.textContent = "قبلاً این کلمه را پیدا کرده‌اید!";
+                messageArea.style.color = 'yellow';
+            } else if (currentWordData.words.includes(word)) {
+                foundWords.push(word);
+                score += word.length * 2;
+                scoreEl.textContent = translations[currentLang].score + score;
+                messageArea.textContent = "صحیح! + " + (word.length * 2) + " امتیاز";
+                messageArea.style.color = 'var(--theme-correct-color)';
+                foundWordsEl.innerHTML = `کلمات پیدا شده: ${foundWords.join(', ')}`;
+
+                if (foundWords.length === currentWordData.words.length) {
+                    messageArea.textContent = "تبریک! تمام کلمات پیدا شدند!";
+                    setTimeout(nextRound, 1500); // Move to the next round/game after success
+                }
+            } else {
+                messageArea.textContent = "کلمه نامعتبر یا اشتباه است!";
+                messageArea.style.color = 'var(--theme-incorrect-color)';
+                // No score penalty for simplicity
+            }
+        }
+
+        /**
+         * Determines which game type to start based on the current level.
+         */
+        function startCurrentLevel() {
+            // Simple rotation: First X levels are sentence game, then word game.
+            if (level <= SENTENCE_GAME_ROUNDS) {
+                startSentenceGame();
+            } else {
+                startWordGame();
+            }
+        }
+
+
+        // --- Event Listeners and Initialization ---
+
+        function setupListeners() {
+            startBtn.addEventListener('click', startGame);
+            restartBtn.addEventListener('click', startGame);
+            exitBtn.addEventListener('click', () => {
+                clearInterval(gameTimerInterval);
+                switchScreen('menu');
+            });
+            document.getElementById('bot-btn').addEventListener('click', () => showMessageModal('comingSoon'));
+            document.getElementById('challenge-btn').addEventListener('click', () => showMessageModal('comingSoon'));
+            document.getElementById('rewards-btn').addEventListener('click', () => showMessageModal('comingSoon'));
+            
+            // Settings: Theme Change
+            document.querySelectorAll('#theme-options .setting-option-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => applyTheme(e.target.dataset.theme));
+            });
+
+            // Settings: Language Change
+            document.querySelectorAll('#language-options .setting-option-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    currentLang = e.target.dataset.langCode;
+                    localStorage.setItem('royaLang', currentLang);
+                    updateTextContent();
+                    updateLanguageButtons();
+                });
+            });
+
+            // Settings: Music Toggle (SFX removed)
+            musicToggle.addEventListener('change', (e) => {
+                isMusicOn = e.target.checked;
+                localStorage.setItem('royaMusic', isMusicOn);
+                // In a real app, you would play/pause audio context here
+                console.log('Music is now: ' + (isMusicOn ? 'On' : 'Off'));
+            });
+
+            // Set initial toggle state
+            musicToggle.checked = isMusicOn;
+        }
+
+        /**
+         * Initial setup when the page loads.
+         */
+        function initialize() {
+            // Apply theme and language based on saved state
+            document.body.classList.remove('brown-gold-theme', 'blue-gold-theme');
+            if (currentTheme !== 'brown-gold') {
+                document.body.classList.add(currentTheme + '-theme');
+            }
+            
+            updateThemeButtons();
+            updateLanguageButtons();
+            updateTextContent();
+            setupListeners();
+            switchScreen('menu');
+            
+            // Set initial high score text correctly
+            highScoreEl.textContent = highScore;
+        }
+
+        window.onload = initialize;
+
     </script>
 </body>
 </html>
